@@ -1,1 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AngoMarket - La marketplace angolaise</title>
+    
+    <!-- Firebase SDK (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f5f7fa;
+        }
+        
+        /* Header */
+        .header {
+            background: #1a237e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: 500;
+        }
+        
+        .header .auth-links a {
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        
+        .header .auth-links a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1a237e;
+        }
+        
+        .navbar .logo span {
+            color: #f44336;
+        }
+        
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover {
+            color: #1a237e;
+        }
+        
+        .lang-selector {
+            background: #e8eaf6;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Container principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Liste des produits */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            transition: 0.3s;
+            padding: 20px;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.12);
+        }
+        
+        .product-card h3 {
+            color: #1a237e;
+            margin-bottom: 10px;
+        }
+        
+        .product-card .price {
+            color: #f44336;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .product-card .location {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        /* Formulaire d'ajout */
+        .form-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            margin-top: 40px;
+        }
+        
+        .form-section h2 {
+            color: #1a237e;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-group input, 
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            background: #1a237e;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .btn:hover {
+            background: #0d47a1;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+        }
+        
+        .btn-danger:hover {
+            background: #c62828;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #1a1a2e;
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            padding: 30px;
+            margin-top: 60px;
+        }
+        
+        /* Messages */
+        .message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+        
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .nav-links a {
+                margin: 0 8px;
+                font-size: 14px;
+            }
+            
+            .hero h1 {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="auth-links">
+            <a href="#" id="loginBtn">🔑 Se connecter</a>
+            <a href="#" id="registerBtn">📝 S'inscrire</a>
+        </div>
+        <div id="userInfo" style="display: none;">
+            <span id="userName">👤 </span>
+            <button id="logoutBtn" style="background: rgba(255,0,0,0.2); border: none; color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer;">Déconnexion</button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navbar">
+        <div class="logo">Ango<span>Market</span></div>
+        <div class="nav-links">
+            <a href="#">Accueil</a>
+            <a href="#">Recherche</a>
+            <a href="#" id="publishLink">Publier</a>
+            <a href="#">Profil</a>
+            <a href="#">CGU</a>
+        </div>
+        <div class="lang-selector">🌍 Français</div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+        <h1>🚀 La première marketplace angolaise</h1>
+        <p>Achetez, vendez et promouvez vos produits partout en Angola.</p>
+    </div>
+
+    <!-- Container principal -->
+    <div class="container">
+        <!-- Message de statut -->
+        <div id="message" class="message"></div>
+
+        <!-- Liste des produits -->
+        <h2 style="color: #1a237e;">🛍️ Derniers produits</h2>
+        <div id="productsList" class="products-grid">
+            <p style="grid-column: 1/-1; text-align: center; color: #666;">Chargement des produits...</p>
+        </div>
+
+        <!-- Formulaire d'ajout (caché par défaut) -->
+        <div id="addProductForm" class="form-section" style="display: none;">
+            <h2>📦 Publier un produit</h2>
+            <form id="productForm">
+                <div class="form-group">
+                    <label>Titre du produit</label>
+                    <input type="text" id="titleInput" placeholder="Ex: iPhone 13 Pro" required>
+                </div>
+                <div class="form-group">
+                    <label>Prix (AOA)</label>
+                    <input type="number" id="priceInput" placeholder="Ex: 450000" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="descInput" rows="3" placeholder="Décrivez votre produit..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Localisation</label>
+                    <input type="text" id="locationInput" placeholder="Ex: Luanda, Benguela..." required>
+                </div>
+                <button type="submit" class="btn">✅ Publier</button>
+                <button type="button" id="cancelPublish" class="btn btn-danger" style="margin-left: 10px;">Annuler</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2026 AngoMarket - Tous droits réservés</p>
+        <p style="font-size: 14px; margin-top: 10px;">Compre. Venda. Promova. Angola.</p>
+    </div>
+
+    <script>
+        // ============================================
+        // 1. CONFIGURATION FIREBASE
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TON_PROJET.firebaseapp.com",
+            projectId: "TON_PROJET",
+            storageBucket: "TON_PROJET.appspot.com",
+            messagingSenderId: "TON_SENDER_ID",
+            appId: "TON_APP_ID"
+        };
+
+        // Initialisation de Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // ============================================
+        // 2. VARIABLES GLOBALES
+        // ============================================
+        const productsList = document.getElementById('productsList');
+        const addForm = document.getElementById('addProductForm');
+        const productForm = document.getElementById('productForm');
+        const messageDiv = document.getElementById('message');
+
+        // ============================================
+        // 3. FONCTIONS UTILITAIRES
+        // ============================================
+        function showMessage(text, isError = false) {
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            messageDiv.className = 'message' + (isError ? ' error' : '');
+            setTimeout(() => { messageDiv.style.display = 'none'; }, 4000);
+        }
+
+        // ============================================
+        // 4. AUTHENTIFICATION
+        // ============================================
+        // Vérifier si l'utilisateur est connecté
+        auth.onAuthStateChanged(user => {
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const userInfo = document.getElementById('userInfo');
+            const userName = document.getElementById('userName');
+
+            if (user) {
+                loginBtn.style.display = 'none';
+                registerBtn.style.display = 'none';
+                userInfo.style.display = 'inline-block';
+                userName.textContent = '👤 ' + (user.displayName || user.email || 'Utilisateur');
+            } else {
+                loginBtn.style.display = 'inline';
+                registerBtn.style.display = 'inline';
+                userInfo.style.display = 'none';
+            }
+        });
+
+        // Connexion (simple pour test)
+        document.getElementById('loginBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = prompt('Entrez votre email:');
+            const password = prompt('Entrez votre mot de passe:');
+            if (email && password) {
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => showMessage('✅ Connexion réussie !'))
+                    .catch(err => showMessage('❌ Erreur: ' + err.message, true));
+            }
+        });
+
+        // Inscription
+        document.getElementById('registerBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            const email = prompt('Entrez votre email:');
+            const password = prompt('Entrez votre mot de passe (6+ caractères):');
+            if (email && password && password.length >= 6) {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(() => showMessage('✅ Inscription réussie !'))
+                    .catch(err => showMessage('❌ Erreur: ' + err.message, true));
+            } else if (password && password.length < 6) {
+                showMessage('❌ Mot de passe trop court (minimum 6 caractères)', true);
+            }
+        });
+
+        // Déconnexion
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            auth.signOut()
+                .then(() => showMessage('✅ Déconnecté'))
+                .catch(err => showMessage('❌ Erreur: ' + err.message, true));
+        });
+
+        // ============================================
+        // 5. PUBLIER UN PRODUIT (AFFICHAGE / CACHAGE)
+        // ============================================
+        document.getElementById('publishLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) {
+                showMessage('❌ Veuillez vous connecter pour publier', true);
+                return;
+            }
+            addForm.style.display = (addForm.style.display === 'none') ? 'block' : 'none';
+            if (addForm.style.display === 'block') {
+                addForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        document.getElementById('cancelPublish').addEventListener('click', () => {
+            addForm.style.display = 'none';
+            productForm.reset();
+        });
+
+        // ============================================
+        // 6. AJOUTER UN PRODUIT (FIREBASE)
+        // ============================================
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const user = auth.currentUser;
+            if (!user) {
+                showMessage('❌ Connectez-vous pour publier', true);
+                return;
+            }
+
+            const title = document.getElementById('titleInput').value.trim();
+            const price = parseFloat(document.getElementById('priceInput').value);
+            const description = document.getElementById('descInput').value.trim();
+            const location = document.getElementById('locationInput').value.trim();
+
+            if (!title || !price || !description || !location) {
+                showMessage('❌ Tous les champs sont obligatoires', true);
+                return;
+            }
+
+            try {
+                await db.collection('products').add({
+                    title,
+                    price,
+                    description,
+                    location,
+                    userId: user.uid,
+                    userEmail: user.email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                showMessage('✅ Produit publié avec succès !');
+                productForm.reset();
+                addForm.style.display = 'none';
+                loadProducts(); // Recharger la liste
+            } catch (error) {
+                showMessage('❌ Erreur: ' + error.message, true);
+                console.error('Erreur Firestore:', error);
+            }
+        });
+
+        // ============================================
+        // 7. CHARGER LES PRODUITS (FIREBASE)
+        // ============================================
+        async function loadProducts() {
+            try {
+                productsList.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">⏳ Chargement...</p>';
+
+                const snapshot = await db.collection('products')
+                    .orderBy('createdAt', 'desc')
+                    .limit(20)
+                    .get();
+
+                if (snapshot.empty) {
+                    productsList.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">Aucun produit pour le moment. Soyez le premier à publier ! 🚀</p>';
+                    return;
+                }
+
+                let html = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    html += `
+                        <div class="product-card">
+                            <h3>${escapeHtml(data.title)}</h3>
+                            <div class="price">${formatPrice(data.price)} AOA</div>
+                            <p style="margin: 10px 0; color: #555;">${escapeHtml(data.description)}</p>
+                            <div class="location">📍 ${escapeHtml(data.location)}</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 10px;">Par ${escapeHtml(data.userEmail || 'Anonyme')}</div>
+                        </div>
+                    `;
+                });
+
+                productsList.innerHTML = html;
+
+            } catch (error) {
+                console.error('Erreur de chargement:', error);
+                productsList.innerHTML = `
+                    <p style="grid-column: 1/-1; text-align: center; color: #c62828;">
+                        ❌ Erreur de chargement. Vérifiez la console et vos règles Firestore.
+                    </p>
+                `;
+                showMessage('❌ Erreur: ' + error.message, true);
+            }
+        }
+
+        // ============================================
+        // 8. FONCTIONS DE SÉCURITÉ
+        // ============================================
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        }
+
+        // ============================================
+        // 9. DÉMARRAGE
+        // ============================================
+        loadProducts();
+
+        // Recharger les produits toutes les 60 secondes
+        setInterval(loadProducts, 60000);
+
+        console.log('✅ AngoMarket chargé avec succès !');
+        console.log('🔐 Firebase Auth: activé');
+        console.log('📦 Firestore: en attente de données');
+    </script>
+
+</body>
+  </html>
