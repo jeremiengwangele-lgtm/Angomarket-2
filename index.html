@@ -6,1146 +6,221 @@
   <title>AngoMarket — Compre. Venda. Promova. Angola.</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    /* ── Variables CSS (couleurs et espacements) ── */
     :root {
-      --rouge: #E01E1E;
-      --orange: #F26522;
-      --noir: #1A1A1A;
-      --gris-clair: #F7F7F7;
-      --gris-bord: #EEEEEE;
-      --vert-wa: #25D366;
-      --or: #F5A623;
-      --blanc: #ffffff;
+      --rouge: #E01E1E; --orange: #F26522; --noir: #1A1A1A;
+      --gris: #F7F7F7; --bord: #EEEEEE; --wa: #25D366; --or: #F5A623;
+      --blanc: #ffffff; --admin: #4F46E5;
     }
-
-    /* ── Reset global ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--gris-clair);
-      color: var(--noir);
-      min-height: 100vh;
-    }
+    body { font-family: 'Inter', sans-serif; background: var(--gris); color: var(--noir); }
     button { cursor: pointer; font-family: inherit; }
     input, select, textarea { font-family: inherit; }
 
     /* ── Navigation ── */
-    .nav {
-      background: var(--blanc);
-      border-bottom: 1.5px solid var(--gris-bord);
-      position: sticky; top: 0; z-index: 200;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-    }
-    .nav-inner {
-      max-width: 960px; margin: 0 auto;
-      padding: 10px 16px;
-      display: flex; align-items: center;
-      justify-content: space-between; flex-wrap: wrap; gap: 8px;
-    }
-    .logo {
-      display: flex; align-items: center; gap: 10px;
-      cursor: pointer; text-decoration: none;
-    }
-    .logo-icon {
-      width: 40px; height: 40px; border-radius: 10px;
-      background: linear-gradient(135deg, var(--orange), var(--rouge));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; flex-shrink: 0;
-    }
-    .logo-text { font-size: 19px; font-weight: 900; line-height: 1; }
-    .logo-text span:first-child { color: var(--rouge); }
+    .nav { background: var(--blanc); border-bottom: 1.5px solid var(--bord); position: sticky; top: 0; z-index: 200; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+    .nav-inner { max-width: 960px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .logo-icon { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--orange), var(--rouge)); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .logo-text { font-size: 19px; font-weight: 900; }
+    .logo-text .r { color: var(--rouge); }
     .logo-sub { font-size: 10px; color: #999; margin-top: 2px; }
     .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
-    .nav-btn {
-      padding: 9px 14px; border-radius: 10px; border: none;
-      font-size: 13px; font-weight: 500; background: transparent; color: #555;
-      transition: all 0.15s;
-    }
+    .nav-btn { padding: 9px 12px; border-radius: 10px; border: none; font-size: 12px; font-weight: 500; background: transparent; color: #555; transition: all 0.15s; }
     .nav-btn.actif { background: var(--rouge); color: var(--blanc); font-weight: 700; }
-    .nav-btn:hover:not(.actif) { background: #f5f5f5; }
-    .select-langue {
-      border: 1.5px solid var(--gris-bord); border-radius: 8px;
-      padding: 7px 10px; font-size: 13px; outline: none; cursor: pointer;
-      background: var(--blanc);
-    }
+    .nav-btn.admin-btn { background: var(--admin); color: var(--blanc); }
+    .select-langue { border: 1.5px solid var(--bord); border-radius: 8px; padding: 7px 10px; font-size: 13px; outline: none; cursor: pointer; background: var(--blanc); }
 
-    /* ── Pages (affichage/masquage) ── */
+    /* ── Auth bar ── */
+    .auth-bar { background: var(--noir); padding: 8px 16px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+    .auth-user { color: #ccc; font-size: 13px; }
+    .auth-user span { color: var(--or); font-weight: 700; }
+    .btn-auth { padding: 6px 14px; border-radius: 8px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-connexion { background: transparent; color: #ccc; border: 1px solid #444; }
+    .btn-inscription { background: var(--rouge); color: var(--blanc); }
+    .btn-deconnexion { background: #333; color: #ccc; }
+    .badge-admin { background: var(--admin); color: var(--blanc); font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-left: 6px; }
+    .badge-premium { background: var(--or); color: var(--noir); font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-left: 6px; }
+
+    /* ── Pages ── */
     .page { display: none; }
     .page.active { display: block; }
 
     /* ── Hero ── */
-    .hero {
-      background: linear-gradient(135deg, #1A1A1A 0%, #2D0A0A 50%, var(--rouge) 100%);
-      padding: 60px 24px 50px; text-align: center; color: var(--blanc);
-    }
-    .hero h1 { font-size: 28px; font-weight: 900; margin-bottom: 10px; line-height: 1.2; }
-    .hero p { font-size: 16px; color: #FFB3A7; margin-bottom: 28px; max-width: 380px; margin-left: auto; margin-right: auto; }
-    .hero-search {
-      display: flex; max-width: 500px; margin: 0 auto 20px;
-    }
-    .hero-search input {
-      flex: 1; padding: 14px 18px; font-size: 15px;
-      border: none; border-radius: 12px 0 0 12px; outline: none;
-    }
-    .hero-search button {
-      background: var(--orange); color: var(--blanc); border: none;
-      border-radius: 0 12px 12px 0; padding: 14px 20px;
-      font-size: 14px; font-weight: 700;
-    }
-    .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    .btn-hero-sec {
-      background: rgba(255,255,255,0.15); color: var(--blanc);
-      border: 1.5px solid rgba(255,255,255,0.4);
-      border-radius: 10px; padding: 10px 22px; font-size: 14px; font-weight: 600;
-    }
-    .btn-hero-pri {
-      background: var(--orange); color: var(--blanc); border: none;
-      border-radius: 10px; padding: 10px 22px; font-size: 14px; font-weight: 700;
-    }
+    .hero { background: linear-gradient(135deg, #1A1A1A 0%, #2D0A0A 50%, var(--rouge) 100%); padding: 50px 24px 40px; text-align: center; color: var(--blanc); }
+    .hero h1 { font-size: 26px; font-weight: 900; margin-bottom: 10px; }
+    .hero p { font-size: 15px; color: #FFB3A7; margin-bottom: 24px; max-width: 380px; margin-left: auto; margin-right: auto; }
+    .hero-search { display: flex; max-width: 500px; margin: 0 auto 18px; }
+    .hero-search input { flex: 1; padding: 13px 16px; font-size: 14px; border: none; border-radius: 12px 0 0 12px; outline: none; }
+    .hero-search button { background: var(--orange); color: var(--blanc); border: none; border-radius: 0 12px 12px 0; padding: 13px 18px; font-size: 14px; font-weight: 700; }
+    .hero-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn-hero-sec { background: rgba(255,255,255,0.15); color: var(--blanc); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 600; }
+    .btn-hero-pri { background: var(--orange); color: var(--blanc); border: none; border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 700; }
 
-    /* ── Stats barre ── */
-    .stats-bar {
-      display: flex; background: var(--noir);
-    }
-    .stat-item {
-      flex: 1; text-align: center; padding: 16px 10px;
-      border-right: 1px solid #333;
-    }
+    /* ── Stats ── */
+    .stats-bar { display: flex; background: var(--noir); }
+    .stat-item { flex: 1; text-align: center; padding: 14px 8px; border-right: 1px solid #333; }
     .stat-item:last-child { border-right: none; }
-    .stat-val { font-size: 22px; font-weight: 900; color: var(--orange); }
-    .stat-lab { font-size: 12px; color: #888; margin-top: 2px; }
+    .stat-val { font-size: 20px; font-weight: 900; color: var(--orange); }
+    .stat-lab { font-size: 11px; color: #888; margin-top: 2px; }
 
-    /* ── Contenu centré ── */
+    /* ── Contenu ── */
     .contenu { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+    .titre-section { font-size: 18px; font-weight: 800; color: var(--noir); margin: 28px 0 14px; }
 
-    /* ── Titre section ── */
-    .titre-section {
-      font-size: 20px; font-weight: 800; color: var(--noir);
-      margin: 32px 0 16px;
-    }
-
-    /* ── Grille catégories ── */
-    .grille-categories {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
-      margin-bottom: 32px;
-    }
-    .carte-categorie {
-      background: var(--blanc); border: 1.5px solid var(--gris-bord);
-      border-radius: 12px; padding: 14px 8px;
-      text-align: center; cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-    }
+    /* ── Catégories ── */
+    .grille-categories { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 28px; }
+    .carte-categorie { background: var(--blanc); border: 1.5px solid var(--bord); border-radius: 12px; padding: 12px 6px; text-align: center; cursor: pointer; transition: all 0.2s; }
     .carte-categorie:hover { border-color: var(--rouge); background: #FFF5F5; }
-    .cat-emoji { font-size: 28px; margin-bottom: 5px; }
-    .cat-nom { font-size: 12px; font-weight: 600; color: #333; }
+    .cat-emoji { font-size: 26px; margin-bottom: 4px; }
+    .cat-nom { font-size: 11px; font-weight: 600; color: #333; }
 
     /* ── Grille annonces ── */
-    .grille-annonces {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px; margin-bottom: 32px;
-    }
+    .grille-annonces { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-bottom: 28px; }
 
     /* ── Carte annonce ── */
-    .carte-annonce {
-      background: var(--blanc); border-radius: 16px; overflow: hidden;
-      border: 1.5px solid var(--gris-bord);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-      transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
-    }
-    .carte-annonce:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-    .carte-annonce.sponsorisee { border-color: var(--rouge); box-shadow: 0 4px 24px rgba(224,30,30,0.18); }
-    .badge-sponsor {
-      position: absolute; top: 10px; right: 10px; z-index: 2;
-      background: var(--rouge); color: var(--blanc);
-      font-size: 11px; font-weight: 700; padding: 3px 10px;
-      border-radius: 20px; letter-spacing: 0.5px;
-    }
-    .annonce-image {
-      background: linear-gradient(135deg, #FFF3F0, #FFE8E0);
-      height: 120px; display: flex; align-items: center;
-      justify-content: center; font-size: 56px;
-    }
-    .annonce-corps { padding: 14px 16px 16px; }
-    .annonce-titre { font-size: 15px; font-weight: 700; color: var(--noir); margin-bottom: 6px; line-height: 1.3; }
-    .annonce-prix { font-size: 18px; font-weight: 800; color: var(--rouge); margin-bottom: 8px; }
-    .annonce-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-    .badge {
-      border-radius: 8px; padding: 2px 8px; font-size: 12px;
-      background: #F5F5F5; color: #555;
-    }
-    .badge-neuf { background: #D1FAE51A; color: #16A34A; font-weight: 600; }
-    .badge-occasion { background: #FEF3C71A; color: #D97706; font-weight: 600; }
-    .badge-service { background: #DBEAFE1A; color: #2563EB; font-weight: 600; }
-    .annonce-vendeur {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 12px; cursor: pointer;
-    }
-    .vendeur-nom { font-size: 13px; color: #666; text-decoration: underline dotted; }
-    .etoiles { display: flex; align-items: center; gap: 3px; font-size: 13px; color: var(--or); }
-    .avis-count { font-size: 12px; color: #999; }
-    .annonce-actions { display: flex; gap: 6px; }
-    .btn-action {
-      flex: 1; display: flex; align-items: center; justify-content: center;
-      gap: 4px; padding: 8px 4px; border-radius: 10px;
-      font-size: 12px; font-weight: 600; border: none;
-      transition: opacity 0.15s;
-    }
-    .btn-action:hover { opacity: 0.85; }
+    .carte-annonce { background: var(--blanc); border-radius: 16px; overflow: hidden; border: 1.5px solid var(--bord); box-shadow: 0 2px 10px rgba(0,0,0,0.06); transition: transform 0.2s; position: relative; }
+    .carte-annonce:hover { transform: translateY(-3px); }
+    .carte-annonce.sponsorisee { border-color: var(--rouge); box-shadow: 0 4px 20px rgba(224,30,30,0.15); }
+    .badge-sponsor { position: absolute; top: 8px; right: 8px; z-index: 2; background: var(--rouge); color: var(--blanc); font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+    .badge-signale { position: absolute; top: 8px; left: 8px; z-index: 2; background: #FF6B35; color: var(--blanc); font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+    .annonce-image { background: linear-gradient(135deg, #FFF3F0, #FFE8E0); height: 110px; display: flex; align-items: center; justify-content: center; font-size: 50px; }
+    .annonce-corps { padding: 12px 14px 14px; }
+    .annonce-titre { font-size: 14px; font-weight: 700; color: var(--noir); margin-bottom: 5px; line-height: 1.3; }
+    .annonce-prix { font-size: 17px; font-weight: 800; color: var(--rouge); margin-bottom: 7px; }
+    .annonce-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 9px; }
+    .badge { border-radius: 7px; padding: 2px 7px; font-size: 11px; background: #F5F5F5; color: #555; }
+    .badge-neuf { background: #D1FAE530; color: #16A34A; font-weight: 600; }
+    .badge-occasion { background: #FEF3C730; color: #D97706; font-weight: 600; }
+    .badge-service { background: #DBEAFE30; color: #2563EB; font-weight: 600; }
+    .annonce-vendeur { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; cursor: pointer; }
+    .vendeur-nom { font-size: 12px; color: #666; text-decoration: underline dotted; }
+    .etoiles { color: var(--or); font-size: 12px; }
+    .annonce-actions { display: flex; gap: 5px; }
+    .btn-action { flex: 1; display: flex; align-items: center; justify-content: center; gap: 3px; padding: 7px 3px; border-radius: 9px; font-size: 11px; font-weight: 600; border: none; }
     .btn-appeler { border: 1.5px solid var(--rouge) !important; background: var(--blanc); color: var(--rouge); }
-    .btn-whatsapp { background: var(--vert-wa); color: var(--blanc); }
+    .btn-whatsapp { background: var(--wa); color: var(--blanc); }
     .btn-msg { border: 1.5px solid var(--noir) !important; background: var(--blanc); color: var(--noir); }
-
-    /* ── Zone message inline ── */
-    .zone-message { margin-top: 10px; display: none; }
+    .btn-signaler { background: #FF6B3520; color: #FF6B35; border: 1.5px solid #FF6B35 !important; font-size: 10px; flex: none; padding: 7px 8px; border-radius: 9px; font-weight: 600; }
+    .zone-message { margin-top: 8px; display: none; }
     .zone-message.visible { display: block; }
-    .zone-message textarea {
-      width: 100%; border-radius: 10px; border: 1.5px solid #DDD;
-      padding: 8px 10px; font-size: 13px; resize: none; outline: none;
-    }
-    .btn-envoyer-msg {
-      margin-top: 6px; width: 100%; background: var(--noir);
-      color: var(--blanc); border: none; border-radius: 10px;
-      padding: 9px; font-size: 13px; font-weight: 700;
-    }
+    .zone-message textarea { width: 100%; border-radius: 9px; border: 1.5px solid #DDD; padding: 7px 9px; font-size: 12px; resize: none; outline: none; }
+    .btn-envoyer-msg { margin-top: 5px; width: 100%; background: var(--noir); color: var(--blanc); border: none; border-radius: 9px; padding: 8px; font-size: 12px; font-weight: 700; }
 
-    /* ── Bannière premium ── */
-    .banniere-premium {
-      background: linear-gradient(135deg, var(--noir), #3D1010);
-      border-radius: 20px; padding: 28px 24px;
-      margin-bottom: 40px; text-align: center; color: var(--blanc);
-    }
-    .banniere-premium h3 { font-size: 20px; font-weight: 800; color: var(--or); margin-bottom: 8px; }
-    .banniere-premium p { color: #CCC; margin-bottom: 20px; font-size: 14px; }
-    .premium-features { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
-    .premium-feature {
-      background: rgba(245,166,35,0.15); border: 1px solid rgba(245,166,35,0.4);
-      color: var(--or); border-radius: 8px; padding: 4px 12px; font-size: 13px;
-    }
-    .premium-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    .btn-premium-or {
-      background: var(--or); color: var(--noir); border: none;
-      border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 800;
-    }
-    .btn-premium-sec {
-      background: transparent; color: var(--blanc);
-      border: 1.5px solid rgba(255,255,255,0.4);
-      border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 600;
-    }
+    /* ── Premium bannière ── */
+    .banniere-premium { background: linear-gradient(135deg, var(--noir), #3D1010); border-radius: 18px; padding: 24px 20px; margin-bottom: 36px; text-align: center; color: var(--blanc); }
+    .banniere-premium h3 { font-size: 18px; font-weight: 800; color: var(--or); margin-bottom: 6px; }
+    .banniere-premium p { color: #CCC; margin-bottom: 16px; font-size: 13px; }
+    .premium-features { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .premium-feature { background: rgba(245,166,35,0.15); border: 1px solid rgba(245,166,35,0.4); color: var(--or); border-radius: 7px; padding: 3px 10px; font-size: 12px; }
+    .premium-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn-premium-or { background: var(--or); color: var(--noir); border: none; border-radius: 10px; padding: 11px 24px; font-size: 14px; font-weight: 800; }
+    .btn-premium-sec { background: transparent; color: var(--blanc); border: 1.5px solid rgba(255,255,255,0.4); border-radius: 10px; padding: 11px 24px; font-size: 14px; font-weight: 600; }
 
-    /* ── Filtres recherche ── */
-    .bloc-filtres {
-      background: var(--blanc); border-radius: 16px;
-      border: 1.5px solid var(--gris-bord);
-      padding: 20px; margin-bottom: 24px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-    }
-    .filtre-search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
-    .filtre-search-bar input {
-      flex: 1; padding: 12px 16px; font-size: 15px;
-      border: 1.5px solid #E8E8E8; border-radius: 10px; outline: none;
-    }
-    .btn-filtrer {
-      background: var(--rouge); color: var(--blanc); border: none;
-      border-radius: 10px; padding: 12px 18px;
-      font-weight: 700; font-size: 14px;
-    }
-    .grille-filtres {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;
-    }
-    .filtre-label { display: block; font-size: 12px; font-weight: 600; color: #888; margin-bottom: 4px; }
-    .filtre-input {
-      width: 100%; padding: 9px 12px; border-radius: 8px;
-      border: 1.5px solid #E8E8E8; font-size: 14px; outline: none;
-    }
-    .resultats-count { font-size: 14px; color: #888; margin-bottom: 16px; }
+    /* ── Filtres ── */
+    .bloc-filtres { background: var(--blanc); border-radius: 14px; border: 1.5px solid var(--bord); padding: 18px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .filtre-search-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+    .filtre-search-bar input { flex: 1; padding: 11px 14px; font-size: 14px; border: 1.5px solid #E8E8E8; border-radius: 10px; outline: none; }
+    .btn-filtrer { background: var(--rouge); color: var(--blanc); border: none; border-radius: 10px; padding: 11px 16px; font-weight: 700; font-size: 13px; }
+    .grille-filtres { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+    .filtre-label { display: block; font-size: 11px; font-weight: 600; color: #888; margin-bottom: 3px; }
+    .filtre-input { width: 100%; padding: 8px 11px; border-radius: 8px; border: 1.5px solid #E8E8E8; font-size: 13px; outline: none; }
 
-    /* ── Formulaire publication ── */
-    .form-publier {
-      background: var(--blanc); border-radius: 20px;
-      border: 1.5px solid var(--gris-bord);
-      padding: 24px; max-width: 600px; margin: 0 auto 40px;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-    }
-    .form-group { margin-bottom: 16px; }
-    .form-label { display: block; font-size: 13px; font-weight: 700; color: #333; margin-bottom: 6px; }
-    .form-input {
-      width: 100%; padding: 12px 14px; font-size: 14px;
-      border: 1.5px solid #E8E8E8; border-radius: 10px; outline: none;
-      transition: border-color 0.2s;
-    }
+    /* ── Formulaires ── */
+    .form-card { background: var(--blanc); border-radius: 18px; border: 1.5px solid var(--bord); padding: 22px; max-width: 600px; margin: 0 auto 36px; box-shadow: 0 2px 14px rgba(0,0,0,0.06); }
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: #333; margin-bottom: 5px; }
+    .form-input { width: 100%; padding: 11px 13px; font-size: 13px; border: 1.5px solid #E8E8E8; border-radius: 10px; outline: none; transition: border-color 0.2s; }
     .form-input:focus { border-color: var(--rouge); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .bloc-sponsor {
-      background: linear-gradient(135deg, #FFF8E7, #FFF3CD);
-      border: 1.5px solid var(--or); border-radius: 12px;
-      padding: 14px 16px; margin-bottom: 24px;
-    }
-    .sponsor-label { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
-    .sponsor-titre { font-size: 14px; font-weight: 700; color: #92400E; }
-    .sponsor-desc { font-size: 12px; color: #B45309; margin-top: 2px; }
-    .btn-publier {
-      width: 100%;
-      background: linear-gradient(135deg, var(--rouge), var(--orange));
-      color: var(--blanc); border: none; border-radius: 12px;
-      padding: 15px; font-size: 16px; font-weight: 800;
-    }
-    .alerte-succes {
-      background: #D1FAE5; border: 1.5px solid #10B981;
-      border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;
-      display: none; align-items: center; justify-content: space-between;
-    }
-    .alerte-succes.visible { display: flex; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .bloc-sponsor { background: linear-gradient(135deg, #FFF8E7, #FFF3CD); border: 1.5px solid var(--or); border-radius: 11px; padding: 12px 14px; margin-bottom: 20px; }
+    .sponsor-label { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; }
+    .sponsor-titre { font-size: 13px; font-weight: 700; color: #92400E; }
+    .sponsor-desc { font-size: 11px; color: #B45309; margin-top: 2px; }
+    .btn-soumettre { width: 100%; background: linear-gradient(135deg, var(--rouge), var(--orange)); color: var(--blanc); border: none; border-radius: 11px; padding: 14px; font-size: 15px; font-weight: 800; }
+    .alerte { border-radius: 11px; padding: 12px 16px; margin-bottom: 16px; display: none; align-items: center; justify-content: space-between; }
+    .alerte.visible { display: flex; }
+    .alerte-succes { background: #D1FAE5; border: 1.5px solid #10B981; }
     .alerte-succes span { font-weight: 600; color: #065F46; }
-    .btn-fermer-alerte { background: none; border: none; color: #065F46; font-weight: 700; font-size: 16px; }
-
-    /* ── Profil vendeur ── */
-    .carte-profil {
-      background: var(--blanc); border-radius: 20px;
-      border: 1.5px solid var(--gris-bord); overflow: hidden;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-    .profil-banniere {
-      background: linear-gradient(135deg, var(--rouge), var(--orange)); height: 80px;
-    }
-    .profil-corps { padding: 0 24px 24px; }
-    .profil-avatar {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: var(--noir); border: 4px solid var(--blanc);
-      margin-top: -40px; display: flex; align-items: center;
-      justify-content: center; font-size: 36px; margin-bottom: 12px;
-    }
-    .profil-nom { font-size: 22px; font-weight: 800; }
-    .profil-note { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-    .profil-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-    .btn-profil-appeler {
-      flex: 1; display: flex; align-items: center; justify-content: center;
-      gap: 6px; padding: 12px; border-radius: 10px;
-      border: 1.5px solid var(--rouge); background: var(--blanc); color: var(--rouge);
-      font-size: 14px; font-weight: 600;
-    }
-    .btn-profil-wa {
-      flex: 1; display: flex; align-items: center; justify-content: center;
-      gap: 6px; padding: 12px; border-radius: 10px;
-      border: none; background: var(--vert-wa); color: var(--blanc);
-      font-size: 14px; font-weight: 600;
-    }
-
-    /* ── Avis clients ── */
-    .bloc-avis {
-      background: var(--blanc); border-radius: 16px;
-      border: 1.5px solid var(--gris-bord); padding: 20px;
-      margin-bottom: 24px;
-    }
-    .avis-item {
-      background: #F8F8F8; border-radius: 10px;
-      padding: 10px 14px; margin-bottom: 10px;
-    }
-    .avis-auteur { font-weight: 600; font-size: 13px; }
-    .avis-texte { font-size: 14px; color: #555; margin-top: 4px; }
-    .avis-date { font-size: 11px; color: #AAA; margin-top: 4px; }
-    .bloc-laisser-avis textarea {
-      width: 100%; border-radius: 10px; border: 1.5px solid #E8E8E8;
-      padding: 10px 12px; font-size: 14px; resize: none;
-      outline: none; margin-bottom: 8px;
-    }
-    .btn-envoyer-avis {
-      background: var(--rouge); color: var(--blanc); border: none;
-      border-radius: 10px; padding: 10px 24px; font-size: 14px; font-weight: 700;
-    }
-
-    /* ── Footer ── */
-    footer {
-      background: var(--noir); color: #888;
-      text-align: center; padding: 20px 16px;
-      font-size: 13px; margin-top: 40px;
-    }
-    footer .footer-brand { margin-bottom: 6px; }
-    footer .footer-brand .r { color: var(--rouge); font-weight: 800; }
-    footer .footer-brand .w { color: var(--blanc); font-weight: 800; }
-    footer .footer-brand .o { color: var(--orange); }
-
-    /* ── Vide état ── */
-    .etat-vide { text-align: center; padding: 60px 20px; color: #999; }
-    .etat-vide .icone { font-size: 48px; margin-bottom: 12px; }
-    .etat-vide .titre { font-size: 16px; font-weight: 600; }
-    .etat-vide .sous { font-size: 14px; margin-top: 6px; }
-
-    /* ── Responsive mobile ── */
-    @media (max-width: 600px) {
-      .grille-categories { grid-template-columns: repeat(4, 1fr); gap: 8px; }
-      .cat-nom { font-size: 10px; }
-      .hero h1 { font-size: 22px; }
-      .form-row { grid-template-columns: 1fr; }
-      .nav-links { gap: 2px; }
-      .nav-btn { padding: 7px 10px; font-size: 12px; }
-    }
-  </style>
-</head>
-<body>
-
-<!-- ══════════════════════════════════════════════════════════
-     NAVIGATION
-══════════════════════════════════════════════════════════ -->
-<nav class="nav">
-  <div class="nav-inner">
-    <!-- Logo cliquable vers l'accueil -->
-    <div class="logo" onclick="allerPage('accueil')">
-      <div class="logo-icon">🛍️</div>
-      <div>
-        <div class="logo-text">
-          <span>Ango</span><span style="color:var(--noir)">Market</span>
-        </div>
-        <div class="logo-sub" id="nav-slogan">Achetez. Vendez. Promouvez. Angola.</div>
-      </div>
-    </div>
-
-    <!-- Boutons de navigation -->
-    <div class="nav-links">
-      <button class="nav-btn actif" id="btn-nav-accueil" onclick="allerPage('accueil')">🏠 <span data-t="accueil">Accueil</span></button>
-      <button class="nav-btn" id="btn-nav-recherche" onclick="allerPage('recherche')">🔍 <span data-t="recherche">Recherche</span></button>
-      <button class="nav-btn" id="btn-nav-publier" onclick="allerPage('publier')">➕ <span data-t="publier">Publier</span></button>
-      <button class="nav-btn" id="btn-nav-profil" onclick="allerPage('profil')">👤 <span data-t="profil">Profil</span></button>
-    </div>
-
-    <!-- Sélecteur de langue -->
-    <select class="select-langue" onchange="changerLangue(this.value)">
-      <option value="fr">🇫🇷 Français</option>
-      <option value="pt">🇦🇴 Português</option>
-      <option value="en">🇬🇧 English</option>
-    </select>
-  </div>
-</nav>
-
-<!-- ══════════════════════════════════════════════════════════
-     PAGE ACCUEIL
-══════════════════════════════════════════════════════════ -->
-<div id="page-accueil" class="page active">
-
-  <!-- Hero -->
-  <div class="hero">
-    <h1 data-t="hero1">La première marketplace angolaise</h1>
-    <p data-t="hero2">Achetez, vendez et promouvez vos produits partout en Angola.</p>
-    <div class="hero-search">
-      <input type="text" id="hero-search-input" data-tp="rechercherPlaceholder" placeholder="Rechercher un produit, service..." />
-      <button onclick="lancerRecherche()" data-t="rechercherBtn">Rechercher</button>
-    </div>
-    <div class="hero-btns">
-      <button class="btn-hero-sec" onclick="allerPage('recherche')" data-t="voirAnnonces">Voir les annonces</button>
-      <button class="btn-hero-pri" onclick="allerPage('publier')" data-t="publierMaintenant">Publier maintenant</button>
-    </div>
-  </div>
-
-  <!-- Stats rapides -->
-  <div class="stats-bar">
-    <div class="stat-item">
-      <div class="stat-val" id="stat-annonces">8+</div>
-      <div class="stat-lab">Annonces</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val">8</div>
-      <div class="stat-lab">Villes</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-val">100%</div>
-      <div class="stat-lab">Gratuit</div>
-    </div>
-  </div>
-
-  <div class="contenu">
-
-    <!-- Catégories -->
-    <h2 class="titre-section" data-t="categoriesTitle">Catégories populaires</h2>
-    <div class="grille-categories" id="grille-categories"></div>
-
-    <!-- Annonces sponsorisées -->
-    <h2 class="titre-section">⭐ <span data-t="annoncesSpot">Annonces sponsorisées</span>
-      <span style="background:var(--rouge);color:#fff;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">Premium</span>
-    </h2>
-    <div class="grille-annonces" id="annonces-sponsorisees"></div>
-
-    <!-- Annonces récentes -->
-    <h2 class="titre-section">🕐 <span data-t="annoncesRecentes">Annonces récentes</span></h2>
-    <div class="grille-annonces" id="annonces-recentes"></div>
-
-    <!-- Bannière Premium -->
-    <div class="banniere-premium">
-      <div style="font-size:32px;margin-bottom:10px;">💎</div>
-      <h3 data-t="abonnement">Abonnement Premium</h3>
-      <p data-t="premiumDesc">Mettez vos annonces en avant et attirez plus de clients</p>
-      <div class="premium-features" id="premium-features"></div>
-      <div class="premium-btns">
-        <button class="btn-premium-or">5 000 Kz / mois</button>
-        <button class="btn-premium-sec"><span data-t="sponsorAnn">Annonce sponsorisée</span> — 2 000 Kz</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     PAGE RECHERCHE
-══════════════════════════════════════════════════════════ -->
-<div id="page-recherche" class="page">
-  <div class="contenu">
-    <h2 class="titre-section">🔍 <span data-t="recherche">Recherche</span></h2>
-
-    <div class="bloc-filtres">
-      <div class="filtre-search-bar">
-        <input type="text" id="filtre-texte" data-tp="rechercherPlaceholder" placeholder="Rechercher..." />
-        <button class="btn-filtrer" onclick="filtrerAnnonces()" data-t="rechercherBtn">Rechercher</button>
-      </div>
-      <div class="grille-filtres">
-        <div>
-          <label class="filtre-label">📍 <span data-t="filtreVille">Ville</span></label>
-          <select class="filtre-input" id="filtre-ville" onchange="filtrerAnnonces()">
-            <option value="" data-t="toutesVilles">Toutes les villes</option>
-          </select>
-        </div>
-        <div>
-          <label class="filtre-label">📦 <span data-t="filtreCategorie">Catégorie</span></label>
-          <select class="filtre-input" id="filtre-categorie" onchange="filtrerAnnonces()">
-            <option value="" data-t="toutesCategories">Toutes catégories</option>
-          </select>
-        </div>
-        <div>
-          <label class="filtre-label">🏷️ <span data-t="filtreEtat">État</span></label>
-          <select class="filtre-input" id="filtre-etat" onchange="filtrerAnnonces()">
-            <option value="" data-t="toutEtat">Tous</option>
-            <option value="neuf" data-t="neuf">Neuf</option>
-            <option value="occasion" data-t="occasion">Occasion</option>
-            <option value="service" data-t="service">Service</option>
-          </select>
-        </div>
-        <div>
-          <label class="filtre-label">💰 <span data-t="filtrePrix">Prix max (Kz)</span></label>
-          <input type="number" class="filtre-input" id="filtre-prix" placeholder="ex: 500000" oninput="filtrerAnnonces()" />
-        </div>
-      </div>
-    </div>
-
-    <div class="resultats-count" id="resultats-count"></div>
-    <div class="grille-annonces" id="annonces-recherche"></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     PAGE PUBLIER
-══════════════════════════════════════════════════════════ -->
-<div id="page-publier" class="page">
-  <div class="contenu">
-    <h2 class="titre-section">📝 <span data-t="publierTitre">Publier une annonce</span></h2>
-
-    <!-- Alerte succès -->
-    <div class="alerte-succes" id="alerte-succes">
-      <span>✅ <span data-t="annoncePub">Annonce publiée avec succès !</span></span>
-      <button class="btn-fermer-alerte" onclick="fermerAlerte()">✕</button>
-    </div>
-
-    <div class="form-publier">
-      <!-- Titre -->
-      <div class="form-group">
-        <label class="form-label">📌 <span data-t="titreAnnonce">Titre de l'annonce</span> *</label>
-        <input type="text" class="form-input" id="pub-titre" placeholder="Ex: iPhone 14 Pro 256GB..." />
-      </div>
-      <!-- Description -->
-      <div class="form-group">
-        <label class="form-label">📝 <span data-t="description">Description</span></label>
-        <textarea class="form-input" id="pub-desc" rows="4" placeholder="Décrivez votre produit ou service..." style="resize:vertical"></textarea>
-      </div>
-      <!-- Prix et Ville -->
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">💰 <span data-t="prix">Prix (Kz)</span> *</label>
-          <input type="number" class="form-input" id="pub-prix" placeholder="Ex: 50000" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">📍 <span data-t="ville">Ville</span></label>
-          <select class="form-input" id="pub-ville"></select>
-        </div>
-      </div>
-      <!-- Catégorie et État -->
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">📦 <span data-t="categorie">Catégorie</span></label>
-          <select class="form-input" id="pub-categorie"></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">🏷️ <span data-t="etat">État</span></label>
-          <select class="form-input" id="pub-etat">
-            <option value="neuf" data-t="neuf">Neuf</option>
-            <option value="occasion" data-t="occasion">Occasion</option>
-            <option value="service" data-t="service">Service</option>
-          </select>
-        </div>
-      </div>
-      <!-- WhatsApp -->
-      <div class="form-group">
-        <label class="form-label">📱 <span data-t="telephone">Numéro WhatsApp</span> *</label>
-        <input type="tel" class="form-input" id="pub-tel" placeholder="Ex: 244923456789" />
-      </div>
-      <!-- Option sponsor -->
-      <div class="bloc-sponsor">
-        <label class="sponsor-label">
-          <input type="checkbox" id="pub-sponsor" style="width:18px;height:18px;margin-top:2px;" />
-          <div>
-            <div class="sponsor-titre">⭐ <span data-t="sponsoriser">Sponsoriser cette annonce</span> — 2 000 Kz</div>
-            <div class="sponsor-desc">Votre annonce sera mise en avant sur la page d'accueil</div>
-          </div>
-        </label>
-      </div>
-      <!-- Bouton publier -->
-      <button class="btn-publier" onclick="soumettrAnnonce()">
-        🚀 <span data-t="publierBtn">Publier l'annonce</span>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     PAGE PROFIL
-══════════════════════════════════════════════════════════ -->
-<div id="page-profil" class="page">
-  <div class="contenu">
-    <h2 class="titre-section">👤 <span data-t="profilTitre">Profil vendeur</span></h2>
-
-    <!-- Carte profil principale -->
-    <div class="carte-profil">
-      <div class="profil-banniere"></div>
-      <div class="profil-corps">
-        <div class="profil-avatar">👤</div>
-        <div class="profil-nom" id="profil-nom">Carlos Mendes</div>
-        <div class="profil-note" id="profil-note"></div>
-        <div class="profil-actions">
-          <button class="btn-profil-appeler" id="btn-profil-appeler">
-            📞 <span data-t="appeler">Appeler</span>
-          </button>
-          <button class="btn-profil-wa" id="btn-profil-wa">
-            💬 WhatsApp
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Annonces du vendeur -->
-    <h3 class="titre-section" style="font-size:18px;">
-      📦 <span data-t="produitsMis">Annonces publiées</span>
-      (<span id="profil-nb-annonces">0</span>)
-    </h3>
-    <div class="grille-annonces" id="profil-annonces"></div>
-
-    <!-- Avis clients -->
-    <div class="bloc-avis">
-      <h3 style="font-size:16px;font-weight:700;margin-bottom:14px;">
-        💬 <span data-t="commentaires">Commentaires</span>
-      </h3>
-      <div id="liste-avis"></div>
-      <div class="bloc-laisser-avis">
-        <textarea id="avis-texte" rows="3" data-tp="laisserAvis" placeholder="Laisser un avis..."></textarea>
-        <button class="btn-envoyer-avis" onclick="envoyerAvis()">
-          <span data-t="envoyer">Envoyer</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Bannière premium dans profil -->
-    <div class="banniere-premium" style="margin-bottom:40px;">
-      <div style="font-size:28px;margin-bottom:8px;">💎</div>
-      <h3 data-t="premium">Passer Premium</h3>
-      <p data-t="premiumDesc">Mettez vos annonces en avant et attirez plus de clients</p>
-      <div class="premium-btns">
-        <button class="btn-premium-or">5 000 Kz / mois</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     FOOTER
-══════════════════════════════════════════════════════════ -->
-<footer>
-  <div class="footer-brand">
-    <span class="r">Ango</span><span class="w">Market</span>
-    <span style="margin:0 8px;color:#444;">·</span>
-    <span class="o">Compre. Venda. Promova. Angola.</span>
-  </div>
-  <span data-t="footer_copy">© 2025 AngoMarket. Tous droits réservés.</span>
-</footer>
-
-<!-- ══════════════════════════════════════════════════════════
-     JAVASCRIPT — Logique de l'application
-══════════════════════════════════════════════════════════ -->
-<script>
-
-// ── Traductions multilingues ──────────────────────────────
-const traductions = {
-  fr: {
-    accueil: "Accueil", publier: "Publier", recherche: "Recherche", profil: "Profil",
-    slogan: "Achetez. Vendez. Promouvez. Angola.",
-    rechercherPlaceholder: "Rechercher un produit, service...",
-    rechercherBtn: "Rechercher", categoriesTitle: "Catégories populaires",
-    annoncesSpot: "Annonces sponsorisées", annoncesRecentes: "Annonces récentes",
-    filtrePrix: "Prix max (Kz)", filtreVille: "Ville", filtreEtat: "État", filtreCategorie: "Catégorie",
-    toutesVilles: "Toutes les villes", toutesCategories: "Toutes catégories",
-    toutEtat: "Tous", neuf: "Neuf", occasion: "Occasion", service: "Service",
-    appeler: "Appeler", whatsapp: "WhatsApp", message: "Message",
-    publierTitre: "Publier une annonce", titreAnnonce: "Titre de l'annonce",
-    description: "Description", prix: "Prix (Kz)", ville: "Ville", categorie: "Catégorie",
-    etat: "État du produit", telephone: "Numéro WhatsApp", photo: "Photo du produit",
-    publierBtn: "Publier l'annonce", sponsoriser: "Sponsoriser cette annonce",
-    profilTitre: "Profil vendeur", noteMoyenne: "Note moyenne", avis: "avis",
-    produitsMis: "Annonces publiées", premium: "Passer Premium",
-    premiumDesc: "Mettez vos annonces en avant et attirez plus de clients",
-    abonnement: "Abonnement Premium", sponsorAnn: "Annonce sponsorisée",
-    hero1: "La première marketplace angolaise",
-    hero2: "Achetez, vendez et promouvez vos produits partout en Angola.",
-    voirAnnonces: "Voir les annonces", publierMaintenant: "Publier maintenant",
-    commentaires: "Commentaires", laisserAvis: "Laisser un avis...", envoyer: "Envoyer",
-    annoncePub: "Annonce publiée avec succès !", fermer: "Fermer",
-    categoriesPop: ["Électronique","Automobile","Immobilier","Mode","Services","Alimentation","Maison","Emploi"],
-    villes: ["Luanda","Benguela","Huambo","Lubango","Malanje","Cabinda","Uíge","Kuito"],
-    premium_features: ["Annonce en tête de liste","Badge vendeur vérifié","Statistiques de vues","Support prioritaire"],
-    footer_copy: "© 2025 AngoMarket. Tous droits réservés.",
-  },
-  pt: {
-    accueil: "Início", publier: "Publicar", recherche: "Pesquisa", profil: "Perfil",
-    slogan: "Compre. Venda. Promova. Angola.",
-    rechercherPlaceholder: "Pesquisar produto, serviço...",
-    rechercherBtn: "Pesquisar", categoriesTitle: "Categorias populares",
-    annoncesSpot: "Anúncios patrocinados", annoncesRecentes: "Anúncios recentes",
-    filtrePrix: "Preço máx (Kz)", filtreVille: "Cidade", filtreEtat: "Estado", filtreCategorie: "Categoria",
-    toutesVilles: "Todas as cidades", toutesCategories: "Todas categorias",
-    toutEtat: "Todos", neuf: "Novo", occasion: "Usado", service: "Serviço",
-    appeler: "Ligar", whatsapp: "WhatsApp", message: "Mensagem",
-    publierTitre: "Publicar um anúncio", titreAnnonce: "Título do anúncio",
-    description: "Descrição", prix: "Preço (Kz)", ville: "Cidade", categorie: "Categoria",
-    etat: "Estado do produto", telephone: "Número WhatsApp", photo: "Foto do produto",
-    publierBtn: "Publicar anúncio", sponsoriser: "Patrocinar este anúncio",
-    profilTitre: "Perfil vendedor", noteMoyenne: "Nota média", avis: "avaliações",
-    produitsMis: "Anúncios publicados", premium: "Tornar Premium",
-    premiumDesc: "Destaque seus anúncios e atraia mais clientes",
-    abonnement: "Assinatura Premium", sponsorAnn: "Anúncio patrocinado",
-    hero1: "O primeiro marketplace angolano",
-    hero2: "Compre, venda e promova seus produtos em todo Angola.",
-    voirAnnonces: "Ver anúncios", publierMaintenant: "Publicar agora",
-    commentaires: "Comentários", laisserAvis: "Deixar avaliação...", envoyer: "Enviar",
-    annoncePub: "Anúncio publicado com sucesso!", fermer: "Fechar",
-    categoriesPop: ["Electrónica","Automóvel","Imóveis","Moda","Serviços","Alimentação","Casa","Emprego"],
-    villes: ["Luanda","Benguela","Huambo","Lubango","Malanje","Cabinda","Uíge","Kuito"],
-    premium_features: ["Anúncio no topo","Selo verificado","Estatísticas","Suporte prioritário"],
-    footer_copy: "© 2025 AngoMarket. Todos os direitos reservados.",
-  },
-  en: {
-    accueil: "Home", publier: "Post Ad", recherche: "Search", profil: "Profile",
-    slogan: "Buy. Sell. Promote. Angola.",
-    rechercherPlaceholder: "Search for a product, service...",
-    rechercherBtn: "Search", categoriesTitle: "Popular Categories",
-    annoncesSpot: "Sponsored Ads", annoncesRecentes: "Recent Ads",
-    filtrePrix: "Max Price (Kz)", filtreVille: "City", filtreEtat: "Condition", filtreCategorie: "Category",
-    toutesVilles: "All cities", toutesCategories: "All categories",
-    toutEtat: "All", neuf: "New", occasion: "Used", service: "Service",
-    appeler: "Call", whatsapp: "WhatsApp", message: "Message",
-    publierTitre: "Post an Ad", titreAnnonce: "Ad Title",
-    description: "Description", prix: "Price (Kz)", ville: "City", categorie: "Category",
-    etat: "Product Condition", telephone: "WhatsApp Number", photo: "Product Photo",
-    publierBtn: "Post Ad", sponsoriser: "Sponsor this ad",
-    profilTitre: "Seller Profile", noteMoyenne: "Average Rating", avis: "reviews",
-    produitsMis: "Published Ads", premium: "Go Premium",
-    premiumDesc: "Boost your ads and attract more customers",
-    abonnement: "Premium Subscription", sponsorAnn: "Sponsored Ad",
-    hero1: "Angola's first marketplace",
-    hero2: "Buy, sell and promote your products all across Angola.",
-    voirAnnonces: "View Ads", publierMaintenant: "Post Now",
-    commentaires: "Reviews", laisserAvis: "Leave a review...", envoyer: "Send",
-    annoncePub: "Ad published successfully!", fermer: "Close",
-    categoriesPop: ["Electronics","Cars","Real Estate","Fashion","Services","Food","Home","Jobs"],
-    villes: ["Luanda","Benguela","Huambo","Lubango","Malanje","Cabinda","Uíge","Kuito"],
-    premium_features: ["Top placement","Verified badge","View stats","Priority support"],
-    footer_copy: "© 2025 AngoMarket. All rights reserved.",
-  }
-};
-
-// ── Données des annonces ──────────────────────────────────
-let annonces = [
-  { id:1, titre:"iPhone 14 Pro - Très bon état", prix:350000, ville:"Luanda", categorie:"Électronique", etat:"occasion", vendeur:"Carlos Mendes", telephone:"244923456789", note:4.7, avis:32, sponsorise:true, emoji:"📱", description:"iPhone 14 Pro 256GB, couleur noir. Fonctionne parfaitement." },
-  { id:2, titre:"Toyota Hilux 2019 - Automatique", prix:12500000, ville:"Benguela", categorie:"Automobile", etat:"occasion", vendeur:"João Silva", telephone:"244912345678", note:4.9, avis:17, sponsorise:true, emoji:"🚗", description:"Toyota Hilux double cabine, 4x4, climatisation, 78000 km." },
-  { id:3, titre:"Chauffeur privé disponible - Luanda", prix:15000, ville:"Luanda", categorie:"Services", etat:"service", vendeur:"Miguel António", telephone:"244934567890", note:4.5, avis:48, sponsorise:false, emoji:"🚕", description:"Chauffeur expérimenté, disponible 24h/24. Véhicule climatisé." },
-  { id:4, titre:"Appartement T3 - Talatona", prix:1800000, ville:"Luanda", categorie:"Immobilier", etat:"neuf", vendeur:"Ana Ferreira", telephone:"244945678901", note:4.8, avis:12, sponsorise:false, emoji:"🏠", description:"Bel appartement T3 à Talatona, 2ème étage, gardiennage 24h." },
-  { id:5, titre:"Électricien professionnel", prix:5000, ville:"Huambo", categorie:"Services", etat:"service", vendeur:"Pedro Lopes", telephone:"244956789012", note:4.3, avis:27, sponsorise:false, emoji:"⚡", description:"Installations électriques, dépannage, devis gratuit." },
-  { id:6, titre:"Samsung 65\" QLED 4K - Neuf", prix:420000, ville:"Luanda", categorie:"Électronique", etat:"neuf", vendeur:"Maria Santos", telephone:"244967890123", note:5.0, avis:8, sponsorise:false, emoji:"📺", description:"Téléviseur Samsung QLED 65 pouces, Smart TV, garantie 2 ans." },
-  { id:7, titre:"Mécanicien auto - Luanda", prix:8000, ville:"Luanda", categorie:"Services", etat:"service", vendeur:"Rui Carvalho", telephone:"244978901234", note:4.6, avis:54, sponsorise:false, emoji:"🔧", description:"Mécanique générale, vidange, freins, diagnostic électronique." },
-  { id:8, titre:"Robe de soirée - Grande marque", prix:45000, ville:"Benguela", categorie:"Mode", etat:"neuf", vendeur:"Lucia Neto", telephone:"244989012345", note:4.4, avis:19, sponsorise:false, emoji:"👗", description:"Robe longue de soirée, taille M, couleur bordeaux, neuve." },
-];
-
-// ── Langue et vendeur sélectionnés ───────────────────────
-let langueActuelle = 'fr';
-let vendeurSelectionne = null;
-let avisListe = [];
-
-// ── Génère les étoiles HTML ───────────────────────────────
-function etoilesHTML(note) {
-  let html = '<span class="etoiles">';
-  for (let i = 1; i <= 5; i++) {
-    html += i <= Math.round(note) ? '★' : '☆';
-  }
-  html += `</span>`;
-  return html;
-}
-
-// ── Génère le HTML d'une carte annonce ───────────────────
-function carteAnnonceHTML(annonce) {
-  const t = traductions[langueActuelle];
-  // Badge état coloré
-  const badgeEtat = annonce.etat === 'neuf'
-    ? `<span class="badge badge-neuf">${t.neuf}</span>`
-    : annonce.etat === 'occasion'
-    ? `<span class="badge badge-occasion">${t.occasion}</span>`
-    : `<span class="badge badge-service">${t.service}</span>`;
-
-  return `
-    <div class="carte-annonce ${annonce.sponsorise ? 'sponsorisee' : ''}">
-      ${annonce.sponsorise ? '<div class="badge-sponsor">⭐ SPONSORISÉ</div>' : ''}
-      <div class="annonce-image">${annonce.emoji}</div>
-      <div class="annonce-corps">
-        <div class="annonce-titre">${annonce.titre}</div>
-        <div class="annonce-prix">${annonce.prix.toLocaleString('fr-FR')} Kz</div>
-        <div class="annonce-badges">
-          <span class="badge">📍 ${annonce.ville}</span>
-          ${badgeEtat}
-        </div>
-        <div class="annonce-vendeur" onclick="ouvrirProfil(${annonce.id})">
-          <span class="vendeur-nom">👤 ${annonce.vendeur}</span>
-          <span>${etoilesHTML(annonce.note)} <span class="avis-count">(${annonce.avis})</span></span>
-        </div>
-        <div class="annonce-actions">
-          <button class="btn-action btn-appeler" onclick="appeler('${annonce.telephone}')">📞 ${t.appeler}</button>
-          <button class="btn-action btn-whatsapp" onclick="ouvrirWhatsApp('${annonce.telephone}','${annonce.titre.replace(/'/g,"\\'")}')">💬 WA</button>
-          <button class="btn-action btn-msg" onclick="toggleMessage(this)">✉️ ${t.message}</button>
-        </div>
-        <div class="zone-message">
-          <textarea rows="3" placeholder="Votre message..."></textarea>
-          <button class="btn-envoyer-msg" onclick="envoyerMessage(this)">${t.envoyer}</button>
-        </div>
-      </div>
-    </div>`;
-}
-
-// ── Ouvre WhatsApp avec message pré-rempli ───────────────
-function ouvrirWhatsApp(tel, titre) {
-  const msg = encodeURIComponent(`Bonjour, je suis intéressé(e) par votre annonce : "${titre}"`);
-  window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
-}
-
-// ── Appel téléphonique direct ─────────────────────────────
-function appeler(tel) {
-  window.open(`tel:+${tel}`);
-}
-
-// ── Affiche/masque la zone de message ────────────────────
-function toggleMessage(btn) {
-  const zone = btn.closest('.annonce-corps').querySelector('.zone-message');
-  zone.classList.toggle('visible');
-}
-
-// ── Envoie un message interne ─────────────────────────────
-function envoyerMessage(btn) {
-  const zone = btn.closest('.zone-message');
-  const texte = zone.querySelector('textarea').value;
-  if (!texte.trim()) return;
-  alert('Message envoyé !');
-  zone.querySelector('textarea').value = '';
-  zone.classList.remove('visible');
-}
-
-// ── Ouvre le profil d'un vendeur ─────────────────────────
-function ouvrirProfil(idAnnonce) {
-  const annonce = annonces.find(a => a.id === idAnnonce);
-  if (!annonce) return;
-  vendeurSelectionne = annonce;
-
-  // Remplit les informations du profil
-  document.getElementById('profil-nom').textContent = annonce.vendeur;
-  document.getElementById('profil-note').innerHTML =
-    `${etoilesHTML(annonce.note)}
-     <strong style="color:var(--or)">${annonce.note}/5</strong>
-     <span style="color:#999;font-size:14px">(${annonce.avis} ${traductions[langueActuelle].avis})</span>`;
-
-  // Boutons de contact du profil
-  document.getElementById('btn-profil-appeler').onclick = () => appeler(annonce.telephone);
-  document.getElementById('btn-profil-wa').onclick = () => {
-    const msg = encodeURIComponent(`Bonjour ${annonce.vendeur}, je vous contacte depuis AngoMarket.`);
-    window.open(`https://wa.me/${annonce.telephone}?text=${msg}`, '_blank');
-  };
-
-  // Annonces de ce vendeur
-  const annoncesVendeur = annonces.filter(a => a.vendeur === annonce.vendeur);
-  document.getElementById('profil-nb-annonces').textContent = annoncesVendeur.length;
-  document.getElementById('profil-annonces').innerHTML =
-    annoncesVendeur.length > 0
-    ? annoncesVendeur.map(a => carteAnnonceHTML(a)).join('')
-    : `<div class="etat-vide"><div class="icone">📦</div><div class="titre">Aucune annonce</div></div>`;
-
-  allerPage('profil');
-}
-
-// ── Envoie un avis client ─────────────────────────────────
-function envoyerAvis() {
-  const texte = document.getElementById('avis-texte').value.trim();
-  if (!texte) return;
-  const date = new Date().toLocaleDateString('fr-FR');
-  avisListe.push({ texte, date });
-  document.getElementById('avis-texte').value = '';
-  afficherAvis();
-}
-
-// ── Affiche la liste des avis ─────────────────────────────
-function afficherAvis() {
-  const container = document.getElementById('liste-avis');
-  if (avisListe.length === 0) { container.innerHTML = ''; return; }
-  container.innerHTML = avisListe.map(av => `
-    <div class="avis-item">
-      <div class="avis-auteur">👤 Vous</div>
-      <div class="avis-texte">${av.texte}</div>
-      <div class="avis-date">${av.date}</div>
-    </div>`).join('');
-}
-
-// ── Navigation entre pages ────────────────────────────────
-function allerPage(nomPage) {
-  // Masque toutes les pages
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  // Affiche la page demandée
-  document.getElementById(`page-${nomPage}`).classList.add('active');
-  // Met à jour les boutons de navigation
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('actif'));
-  const btnActif = document.getElementById(`btn-nav-${nomPage}`);
-  if (btnActif) btnActif.classList.add('actif');
-  // Remonte en haut de la page
-  window.scrollTo(0, 0);
-}
-
-// ── Lance la recherche depuis le hero ─────────────────────
-function lancerRecherche() {
-  const texte = document.getElementById('hero-search-input').value;
-  document.getElementById('filtre-texte').value = texte;
-  allerPage('recherche');
-  filtrerAnnonces();
-}
-
-// ── Filtre les annonces selon les critères ────────────────
-function filtrerAnnonces() {
-  const texte = document.getElementById('filtre-texte').value.toLowerCase();
-  const ville = document.getElementById('filtre-ville').value;
-  const categorie = document.getElementById('filtre-categorie').value;
-  const etat = document.getElementById('filtre-etat').value;
-  const prixMax = document.getElementById('filtre-prix').value;
-
-  // Applique tous les filtres
-  const resultats = annonces.filter(a => {
-    if (texte && !a.titre.toLowerCase().includes(texte) && !a.description.toLowerCase().includes(texte)) return false;
-    if (ville && a.ville !== ville) return false;
-    if (categorie && a.categorie !== categorie) return false;
-    if (etat && a.etat !== etat) return false;
-    if (prixMax && a.prix > parseInt(prixMax)) return false;
-    return true;
-  });
-
-  // Affiche les résultats
-  const container = document.getElementById('annonces-recherche');
-  const count = document.getElementById('resultats-count');
-  count.textContent = `${resultats.length} résultat(s) trouvé(s)`;
-
-  if (resultats.length === 0) {
-    container.innerHTML = `
-      <div class="etat-vide" style="grid-column:1/-1">
-        <div class="icone">🔍</div>
-        <div class="titre">Aucune annonce trouvée</div>
-        <div class="sous">Modifiez vos filtres de recherche</div>
-      </div>`;
-  } else {
-    container.innerHTML = resultats.map(a => carteAnnonceHTML(a)).join('');
-  }
-}
-
-// ── Soumet le formulaire de publication ──────────────────
-function soumettrAnnonce() {
-  const titre = document.getElementById('pub-titre').value.trim();
-  const prix = document.getElementById('pub-prix').value;
-  const tel = document.getElementById('pub-tel').value.trim();
-
-  // Vérification des champs obligatoires
-  if (!titre || !prix || !tel) {
-    alert('Veuillez remplir tous les champs obligatoires (*)');
-    return;
-  }
-
-  // Crée la nouvelle annonce
-  const nouvelleAnnonce = {
-    id: Date.now(),
-    titre,
-    description: document.getElementById('pub-desc').value,
-    prix: parseInt(prix),
-    ville: document.getElementById('pub-ville').value || 'Luanda',
-    categorie: document.getElementById('pub-categorie').value || 'Autre',
-    etat: document.getElementById('pub-etat').value,
-    telephone: tel,
-    sponsorise: document.getElementById('pub-sponsor').checked,
-    vendeur: 'Vous',
-    note: 0, avis: 0, emoji: '📦',
-  };
-
-  // Ajoute l'annonce à la liste
-  annonces.unshift(nouvelleAnnonce);
-  afficherAnnoncesAccueil();
-  filtrerAnnonces();
-
-  // Réinitialise le formulaire
-  document.getElementById('pub-titre').value = '';
-  document.getElementById('pub-desc').value = '';
-  document.getElementById('pub-prix').value = '';
-  document.getElementById('pub-tel').value = '';
-  document.getElementById('pub-sponsor').checked = false;
-
-  // Affiche le message de succès
-  const alerte = document.getElementById('alerte-succes');
-  alerte.classList.add('visible');
-  document.getElementById('stat-annonces').textContent = annonces.length + '+';
-}
-
-// ── Ferme l'alerte de succès ──────────────────────────────
-function fermerAlerte() {
-  document.getElementById('alerte-succes').classList.remove('visible');
-}
-
-// ── Affiche les annonces sur la page d'accueil ────────────
-function afficherAnnoncesAccueil() {
-  const sponsorisees = annonces.filter(a => a.sponsorise);
-  const recentes = annonces.filter(a => !a.sponsorise);
-  document.getElementById('annonces-sponsorisees').innerHTML = sponsorisees.map(a => carteAnnonceHTML(a)).join('');
-  document.getElementById('annonces-recentes').innerHTML = recentes.map(a => carteAnnonceHTML(a)).join('');
-  document.getElementById('stat-annonces').textContent = annonces.length + '+';
-}
-
-// ── Peuple les listes déroulantes ─────────────────────────
-function peuplementSelects() {
-  const t = traductions[langueActuelle];
-
-  // Filtre ville (page recherche)
-  const filtreVille = document.getElementById('filtre-ville');
-  filtreVille.innerHTML = `<option value="">${t.toutesVilles}</option>` +
-    t.villes.map(v => `<option value="${v}">${v}</option>`).join('');
-
-  // Filtre catégorie (page recherche)
-  const filtreCategorie = document.getElementById('filtre-categorie');
-  filtreCategorie.innerHTML = `<option value="">${t.toutesCategories}</option>` +
-    t.categoriesPop.map(c => `<option value="${c}">${c}</option>`).join('');
-
-  // Ville (formulaire publication)
-  document.getElementById('pub-ville').innerHTML =
-    `<option value="">-- Sélectionner --</option>` +
-    t.villes.map(v => `<option value="${v}">${v}</option>`).join('');
-
-  // Catégorie (formulaire publication)
-  document.getElementById('pub-categorie').innerHTML =
-    `<option value="">-- Sélectionner --</option>` +
-    t.categoriesPop.map(c => `<option value="${c}">${c}</option>`).join('');
-}
-
-// ── Affiche les catégories sur l'accueil ─────────────────
-function afficherCategories() {
-  const t = traductions[langueActuelle];
-  const emojis = ["📱","🚗","🏠","👗","🔧","🍎","🛋️","💼"];
-  document.getElementById('grille-categories').innerHTML =
-    t.categoriesPop.map((cat, i) => `
-      <div class="carte-categorie" onclick="filtrerParCategorie('${cat}')">
-        <div class="cat-emoji">${emojis[i]}</div>
-        <div class="cat-nom">${cat}</div>
-      </div>`).join('');
-}
-
-// ── Filtre par catégorie depuis l'accueil ─────────────────
-function filtrerParCategorie(categorie) {
-  document.getElementById('filtre-categorie').value = categorie;
-  allerPage('recherche');
-  filtrerAnnonces();
-}
-
-// ── Affiche les avantages Premium ─────────────────────────
-function afficherPremiumFeatures() {
-  const t = traductions[langueActuelle];
-  document.getElementById('premium-features').innerHTML =
-    t.premium_features.map(f => `<span class="premium-feature">✓ ${f}</span>`).join('');
-}
-
-// ── Change la langue et met à jour l'interface ────────────
-function changerLangue(langue) {
-  langueActuelle = langue;
-  const t = traductions[langue];
-
-  // Met à jour tous les éléments avec data-t
-  document.querySelectorAll('[data-t]').forEach(el => {
-    const cle = el.getAttribute('data-t');
-    if (t[cle] !== undefined && typeof t[cle] === 'string') {
-      el.textContent = t[cle];
-    }
-  });
-
-  // Met à jour les placeholders avec data-tp
-  document.querySelectorAll('[data-tp]').forEach(el => {
-    const cle = el.getAttribute('data-tp');
-    if (t[cle]) el.placeholder = t[cle];
-  });
-
-  // Met à jour le slogan
-  document.getElementById('nav-slogan').textContent = t.slogan;
-
-  // Recharge les éléments dynamiques
-  afficherCategories();
-  afficherPremiumFeatures();
-  peuplementSelects();
-  afficherAnnoncesAccueil();
-  filtrerAnnonces();
-}
-
-// ── Initialisation de l'application ──────────────────────
-function init() {
-  afficherCategories();
-  afficherPremiumFeatures();
-  peuplementSelects();
-  afficherAnnoncesAccueil();
-  filtrerAnnonces();
-}
-
-// Lance l'application au chargement de la page
-init();
-
-</script><script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDj9GfibZ77BepNSaoZviqDF-qeNRcz064",
-    authDomain: "angomarket-1543f.firebaseapp.com",
-    projectId: "angomarket-1543f",
-    storageBucket: "angomarket-1543f.firebasestorage.app",
-    messagingSenderId: "14599437423",
-    appId: "1:14599437423:web:b4bdf840152a2fecb2a19a"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  console.log("Firebase connecté !");
-  import { getAuth } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-console.log("Firebase connecté avec succès !");
-</script>
-</body>
-</html>
+    .alerte-erreur { background: #FEE2E2; border: 1.5px solid var(--rouge); }
+    .alerte-erreur span { font-weight: 600; color: #991B1B; }
+    .btn-fermer-alerte { background: none; border: none; font-weight: 700; font-size: 16px; cursor: pointer; }
+
+    /* ── Auth Modal ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 500; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.visible { display: flex; }
+    .modal { background: var(--blanc); border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 400px; position: relative; }
+    .modal h2 { font-size: 20px; font-weight: 800; margin-bottom: 20px; color: var(--noir); }
+    .btn-fermer-modal { position: absolute; top: 16px; right: 16px; background: #F0F0F0; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 16px; font-weight: 700; }
+    .tabs-auth { display: flex; gap: 0; margin-bottom: 20px; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--bord); }
+    .tab-auth { flex: 1; padding: 9px; border: none; background: var(--blanc); font-size: 13px; font-weight: 600; color: #888; cursor: pointer; }
+    .tab-auth.actif { background: var(--rouge); color: var(--blanc); }
+    .separateur { display: flex; align-items: center; gap: 10px; margin: 14px 0; color: #999; font-size: 12px; }
+    .separateur::before, .separateur::after { content: ''; flex: 1; height: 1px; background: var(--bord); }
+    .btn-google { width: 100%; padding: 11px; border: 1.5px solid var(--bord); border-radius: 10px; background: var(--blanc); font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    /* ── Profil ── */
+    .carte-profil { background: var(--blanc); border-radius: 18px; border: 1.5px solid var(--bord); overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 18px rgba(0,0,0,0.07); }
+    .profil-banniere { background: linear-gradient(135deg, var(--rouge), var(--orange)); height: 75px; }
+    .profil-corps { padding: 0 22px 22px; }
+    .profil-avatar { width: 75px; height: 75px; border-radius: 50%; background: var(--noir); border: 4px solid var(--blanc); margin-top: -37px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 10px; }
+    .profil-nom { font-size: 20px; font-weight: 800; }
+    .profil-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .btn-profil-appeler { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 11px; border-radius: 10px; border: 1.5px solid var(--rouge); background: var(--blanc); color: var(--rouge); font-size: 13px; font-weight: 600; }
+    .btn-profil-wa { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 11px; border-radius: 10px; border: none; background: var(--wa); color: var(--blanc); font-size: 13px; font-weight: 600; }
+    .bloc-avis { background: var(--blanc); border-radius: 14px; border: 1.5px solid var(--bord); padding: 18px; margin-bottom: 20px; }
+    .avis-item { background: #F8F8F8; border-radius: 9px; padding: 9px 12px; margin-bottom: 9px; }
+    .avis-auteur { font-weight: 600; font-size: 12px; }
+    .avis-texte { font-size: 13px; color: #555; margin-top: 3px; }
+    .avis-date { font-size: 10px; color: #AAA; margin-top: 3px; }
+    .bloc-laisser-avis textarea { width: 100%; border-radius: 9px; border: 1.5px solid #E8E8E8; padding: 9px 11px; font-size: 13px; resize: none; outline: none; margin-bottom: 7px; }
+    .btn-envoyer-avis { background: var(--rouge); color: var(--blanc); border: none; border-radius: 9px; padding: 9px 22px; font-size: 13px; font-weight: 700; }
+
+    /* ── Panel Admin ── */
+    .admin-header { background: var(--admin); color: var(--blanc); padding: 20px 16px; margin-bottom: 0; }
+    .admin-header h1 { font-size: 22px; font-weight: 900; }
+    .admin-header p { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+    .admin-tabs { display: flex; background: var(--blanc); border-bottom: 1.5px solid var(--bord); overflow-x: auto; }
+    .admin-tab { padding: 12px 18px; border: none; background: transparent; font-size: 13px; font-weight: 600; color: #888; cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; }
+    .admin-tab.actif { color: var(--admin); border-bottom-color: var(--admin); }
+    .admin-contenu { max-width: 960px; margin: 0 auto; padding: 20px 16px; }
+    .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .admin-stat { background: var(--blanc); border-radius: 14px; padding: 16px; border: 1.5px solid var(--bord); text-align: center; }
+    .admin-stat-val { font-size: 28px; font-weight: 900; color: var(--admin); }
+    .admin-stat-lab { font-size: 12px; color: #888; margin-top: 3px; }
+    .admin-table { background: var(--blanc); border-radius: 14px; border: 1.5px solid var(--bord); overflow: hidden; margin-bottom: 20px; }
+    .admin-table-header { background: #F8F8FF; padding: 12px 16px; font-size: 13px; font-weight: 700; color: var(--admin); border-bottom: 1.5px solid var(--bord); }
+    .admin-row { padding: 12px 16px; border-bottom: 1px solid #F0F0F0; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .admin-row:last-child { border-bottom: none; }
+    .admin-row-info { flex: 1; }
+    .admin-row-titre { font-size: 13px; font-weight: 700; color: var(--noir); }
+    .admin-row-meta { font-size: 11px; color: #888; margin-top: 2px; }
+    .admin-row-actions { display: flex; gap: 6px; }
+    .btn-admin-approuver { background: #D1FAE5; color: #065F46; border: none; border-radius: 7px; padding: 6px 12px; font-size: 11px; font-weight: 700; }
+    .btn-admin-supprimer { background: #FEE2E2; color: #991B1B; border: none; border-radius: 7px; padding: 6px 12px; font-size: 11px; font-weight: 700; }
+    .btn-admin-premium { background: #FEF3C7; color: #92400E; border: none; border-radius: 7px; padding: 6px 12px; font-size: 11px; font-weight: 700; }
+    .badge-status { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+    .status-actif { background: #D1FAE5; color: #065F46; }
+    .status-signale { background: #FEE2E2; color: #991B1B; }
+    .status-premium { background: #FEF3C7; color: #92400E; }
+    .politique-section { background: var(--blanc); border-radius: 14px; border: 1.5px solid var(--bord); padding: 20px; margin-bottom: 16px; }
+    .politique-section h3 { font-size: 15px; font-weight: 700; color: var(--noir); margin-bottom: 10px; }
+    .politique-section p { font-size: 13px; color: #555; line-height: 1.7; }
+    .politique-section ul { padding-left: 18px; margin-top: 8px; }
+    .politique-section ul li { font-size: 13px; color: #555; margin-bottom: 5px; line-height: 1.6; }
+
+    /* ── Accès refusé ── */
+    .acces-refuse { text-align: center; padding: 60px 20px; }
+    .acces-refuse .icone { font-size: 60px; margin-bottom: 16px; }
+    .acces-refuse h2 { font-size: 20px; font-weight: 800; color: var(--rouge); margin-bottom: 8px; }
+    .acces-refuse p { font-size: 14px; color: #666; }
+
+    /* ── Chargement ── */
+    .chargement { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+
+    /* ── Vide ── */
+    .etat-vide { text-align: center; padding: 50px 20px; color: #999; grid-column: 1/-1; }
+    .etat-vide .icone { font-size: 44px; margin-bottom: 10px; }
+    .etat-vide .titre { font-size: 15px; font-weight: 600; }
+    .etat-vide .sous { font-size: 13px; margin-top: 5px; }
+
+    /* ── Po
