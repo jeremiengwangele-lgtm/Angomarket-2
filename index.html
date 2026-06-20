@@ -536,7 +536,8 @@ window.goTo = function(p) {
   if (bn) bn.classList.add("active");
   
   // Mise à jour des sections
-  if (p === "profile") renderProf();
+  if (p === "profile") renderProf();const rl = CUD?.role === "admin" ? "🛡️ Administrador" : (CUD?.isPro ? "🏢 Pro" : "👤 Particular");
+const bc = CUD?.role === "admin" ? "bdg-adm" : (CUD?.isPro ? "bdg-pro" : "bdg-usr");
   if (p === "settings") function renderSet() {
   const adminSec = document.getElementById('adminSec');
   // SEUL l'admin voit le panel
