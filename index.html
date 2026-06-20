@@ -414,6 +414,25 @@ function openCW(cid,pn,pp){curChatId=cid;document.getElementById("chatNm").textC
 window.closeChat=function(){document.getElementById("chatWin").style.display="none";if(cUnsub){cUnsub();cUnsub=null;}curChatId=null;};
 window.sendMsg=async function(){const i=document.getElementById("chatI");const t=i.value.trim();if(!t||!curChatId)return;i.value="";await addDoc(collection(db,"chats",curChatId,"messages"),{text:t,senderId:CU.uid,senderName:CUD?.name||CU.email,createdAt:serverTimestamp()});await updateDoc(doc(db,"chats",curChatId),{lastMessage:t,updatedAt:serverTimestamp()});};
 function listenM(){if(mUnsub)mUnsub();const q=query(collection(db,"chats"),where("participants","array-contains",CU.uid),orderBy("updatedAt","desc"));mUnsub=onSnapshot(q,s=>{const el=document.getElementById("chatList");if(s.empty){el.innerHTML=`<div class="empty"><div class="ic">💬</div><p>${T[lang].noMsgs}</p></div>`;return;}el.innerHTML="";s.forEach(d=>{const c=d.data();const cid=d.id;const pid=c.participants.find(p=>p!==CU.uid);const pn=c.participantNames?.[pid]||"Utilizador";el.innerHTML+=`<div class="ci" onclick="openCW('${cid}','${esc(pn)}','')"><div class="cav">${pn[0].toUpperCase()}</div><div class="cif"><div class="cn">${esc(pn)}</div><div class="cp">${esc(c.lastMessage||"...")}</div></div><div class="cm">${ago(c.updatedAt)}</div></div>`;});document.getElementById("mdot").style.display=s.size>0?"block":"none";});}
+  // Navigation améliorée style Alibaba
+window.goTo = function(p) {
+  // Cacher toutes les pages
+  document.querySelectorAll(".page").forEach(x => x.classList.remove("active"));
+  document.querySelectorAll(".bi").forEach(x => x.classList.remove("active"));
+  
+  // Afficher la page demandée
+  const pe = document.getElementById("page" + p.charAt(0).toUpperCase() + p.slice(1));
+  if (pe) pe.classList.add("active");
+  
+  const bn = document.getElementById("bn-" + p);
+  if (bn) bn.classList.add("active");
+  
+  // Mise à jour des sections
+  if (p === "profile") renderProf();
+  if (p === "settings") renderSet();
+  if (p === "favs") renderFavs();
+  if (p === "cart") renderCart(); // Nouvelle fonction
+};
 </script>
 </body>
 </html>
