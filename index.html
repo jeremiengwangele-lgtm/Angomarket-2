@@ -537,7 +537,16 @@ window.goTo = function(p) {
   
   // Mise à jour des sections
   if (p === "profile") renderProf();
-  if (p === "settings") renderSet();
+  if (p === "settings") function renderSet() {
+  const adminSec = document.getElementById('adminSec');
+  // SEUL l'admin voit le panel
+  if (CUD?.role === "admin") {
+    adminSec.style.display = "block";
+    loadAdm();
+  } else {
+    adminSec.style.display = "none";
+  }
+  }
   if (p === "favs") renderFavs();
   if (p === "cart") renderCart(); // Nouvelle fonction
 };
