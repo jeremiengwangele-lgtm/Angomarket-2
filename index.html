@@ -508,7 +508,27 @@ window.selC=function(i){sC=i;buildCats();filterP();};
 window.selPr=function(i){sP=i;buildProvs();filterP();};
 async function loadP(){const q=query(collection(db,"products"),orderBy("createdAt","desc"),limit(60));const s=await getDocs(q);allP=[];s.forEach(d=>allP.push({id:d.id,...d.data()}));filterP();}
 window.filterP=function(){const c=CATS[lang]||CATS.pt;const sr=(document.getElementById("sinp")?.value||"").toLowerCase();let f=allP;if(sC>0)f=f.filter(p=>p.category===c[sC]);if(sP>0)f=f.filter(p=>p.province===PROVS[sP]);if(sr)f=f.filter(p=>(p.title||"").toLowerCase().includes(sr)||(p.description||"").toLowerCase().includes(sr));const ft=f.filter(p=>p.isVedette),nm=f.filter(p=>!p.isVedette);document.getElementById("featGrid").innerHTML=ft.length?ft.map(pCard).join(""):"<p style=\"color:var(--gray3);font-size:.8rem;grid-column:1/-1;\">—</p>";document.getElementById("allGrid").innerHTML=nm.length?nm.map(pCard).join(""):`<div class="empty" style="grid-column:1/-1;"><div class="ic">📭</div><p>${T[lang].noProds}</p></div>`;};
-function pCard(p){const iF=favs.has(p.id);const ph=p.photos&&p.photos[0]?`<img src="${p.photos[0]}" alt="" loading="lazy">`:`<div class="nph">📷</div>`;return`<div class="pc" onclick="openP('${p.id}')"><div class="pi">${ph}${p.isVedette?'<div class="vbadge">⭐ Vedette</div>':""}<div class="cbadge">${esc(p.category||"")}</div><button class="fvbtn" onclick="event.stopPropagation();togFav('${p.id}')">${iF?"❤️":"🤍"}</button></div><div class="pb"><div class="pp">${fmt(p.price)} AOA</div><div class="pt">${esc(p.title)}</div><div class="pl">📍${esc(p.province||p.location||"")}</div><div class="psr"><div class="mav">${(p.userName||"?")[0].toUpperCase()}</div><div class="si"><div class="sn">${esc(p.userName||"Anónimo")}${p.isVerifiedSeller?' <span class="vmark">✓</span>':""}</div><div class="sid">${esc(p.userUniqueId||"")}</div></div></div></div></div>`;}
+function pCard(p){
+  const iF = favs.has(p.id);
+  const ph = p.photos && p.photos[0] ? `<img src="${p.photos[0]}" alt="" loading="lazy">` : `<div class="nph">📷</div>`;
+  return `
+    <div class="pc">
+      <div class="pi" onclick="openP('${p.id}')">
+        ${ph}
+        ${p.isVedette ? '<div class="vbadge">⭐ Vedette</div>' : ''}
+        <div class="cbadge">${esc(p.category || "")}</div>
+        <button class="fvbtn" onclick="event.stopPropagation();togFav('${p.id}')">${iF ? "❤️" : "🤍"}</button>
+      </div>
+      <div class="pb">
+        <div class="pp">${fmt(p.price)} AOA</div>
+        <div class="pt">${esc(p.title)}</div>
+        <div style="display:flex;gap:5px;margin-top:6px;">
+          <button onclick="event.stopPropagation();addToCart('${p.id}')" style="flex:1;background:var(--red);color:#fff;border:none;border-radius:6px;padding:5px;font-size:.75rem;font-weight:600;cursor:pointer;">🛒 Comprar</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
 window.togFav=async function(id){if(!CU)return;if(favs.has(id)){favs.delete(id);}else{favs.add(id);}await updateDoc(doc(db,"users",CU.uid),{favs:[...favs]});filterP();if(document.getElementById("pageFavs").classList.contains("active"))renderFavs();};
 window.togFavD=async function(){if(!curDet)return;await togFav(curDet.id);document.getElementById("dfvBtn").textContent=favs.has(curDet.id)?"❤️":"🤍";};
 function renderFavs(){const fp=allP.filter(p=>favs.has(p.id));document.getElementById("favsGrid").innerHTML=fp.length?fp.map(pCard).join(""):`<div class="empty" style="grid-column:1/-1;"><div class="ic">❤️</div><p>${T[lang].noFavs}</p></div>`;}
