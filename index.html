@@ -546,6 +546,8 @@ window.goTo = function(p) {
   
   const bn = document.getElementById("bn-" + p);
   if (bn) bn.classList.add("active");
+  // Dans loadP() - limite à 50 produits au lieu de 60
+const q = query(collection(db,"products"), orderBy("createdAt","desc"), limit(50));
   
   // Mise à jour des sections
   if (p === "profile") renderProf();const rl = CUD?.role === "admin" ? "🛡️ Administrador" : (CUD?.isPro ? "🏢 Pro" : "👤 Particular");
