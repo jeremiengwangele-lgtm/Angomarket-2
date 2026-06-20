@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AngoMarket</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f5f7fa; padding: 15px; }
+        .header { background: #1a237e; color: white; padding: 15px; border-radius: 10px; text-align: center; }
+        .btn { background: #1a237e; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 16px; margin: 5px; cursor: pointer; }
+        .btn-danger { background: #f44336; }
+        .btn-success { background: #2e7d32; }
+        .box { background: white; padding: 15px; margin: 10px 0; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .error { color: red; background: #ffebee; padding: 10px; border-radius: 5px; }
+        .success { color: green; background: #e8f5e9; padding: 10px; border-radius: 5px; }
+        #log {
+            background: #1a1a2e; color: #0f0; padding: 15px; border-radius: 10px;
+            font-size: 13px; max-height: 300px; overflow-y: scroll;
+            font-family: monospace; white-space: pre-wrap; word-wrap: break-word;
+        }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        .product-item { border: 1px solid #ddd; padding: 12px; margin: 8px 0; border-radius: 8px; }
+        .product-item .price { color: #f44336; font-weight: bold; float: right; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🚀 AngoMarket</h1>
+        <p style="font-size:14px;">Compre. Venda. Promova. Angola.</p>
+    </div>
+
+    <div class="box" style="text-align:center;">
+        <button class="btn" onclick="doSignUp()">📝 Registar</button>
+        <button class="btn" onclick="doSignIn()">🔑 Entrar</button>
+        <button class="btn btn-danger" onclick="doSignOut()">🚪 Sair</button>
+    </div>
+
+    <div id="status" class="box" style="text-align:center;font-weight:bold;">⏳ A ligar ao Firebase...</div>
+
+    <div id="formBox" class="box" style="display:none;">
+        <h3>📦 Publicar produto</h3>
+        <input type="text" id="title" placeholder="Título do produto">
+        <input type="number" id="price" placeholder="Preço (AOA)">
+        <textarea id="desc" placeholder="Descrição" rows="2"></textarea>
+        <input type="text" id="location" placeholder="Localização">
+        <button class="btn btn-success" onclick="publishProduct()">✅ Publicar</button>
+        <button class="btn btn-danger" onclick="hideForm()">Cancelar</button>
+    </div>
+
+    <div style="text-align:center;margin:10px 0;">
+        <button class="btn" onclick="showForm()">📦 Publicar</button>
+        <button class="btn" onclick="loadProducts()">🔄 Recarregar</button>
+    </div>
+
+    <div id="products" class="box">
+        <h3>🛍️ Últimos produtos</h3>
+        <p>⏳ A carregar...</p>
+    </div>
+
+    <h3 style="margin-top:20px;">📋 Diário de erros:</h3>
+    <div id="log">⏳ A inicializar...</div>
+
+    <!-- ✅ SDK MODULAR Firebase 12.x -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import {
+            getFirestore, collection, addDoc, getDocs,
+            orderBy, query, limit, serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        import {
+            getAuth, createUserWithEmailAndPassword,
+            signInWithEmailAndPassword, signOut, onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+        // ✅ CONFIG CORRECTE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDj9GfibZ77BepNSaoZviqDF-qeNRcz064",
+            authDomain: "angomarket-1543f.firebaseapp.com",
+            projectId: "angomarket-1543f",
+            storageBucket: "angomarket-1543f.firebasestorage.app",
+            messagingSenderId: "14599437423",
+            appId: "1:14599437423:web:ec4401fd1e852928b2a19a"
+        };
+
+        const app  = initializeApp(firebaseConfig);
+        const db   = getFirestore(app);
+        const auth = getAuth(app);
+
+        // ─── LOG ───────────────────────────────────────────────
+        function addLog(msg, type = 'info') {
+            const log = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const colors = { info: '#74c0fc', error: '#ff6b6b', success: '#69db7c', warning: '#ffd43b' };
+            log.innerHTML += `<div style="color:${colors[type] || colors.info}">[${time}] ${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function showStatus(msg, isError = false) {
+            const el = document.getElementById('status');
+            el.innerHTML = msg;
+            el.className = 'box ' + (isError ? 'error' : 'success');
+            addLog(msg, isError ? 'error' : 'success');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        addLog('🚀 A iniciar o AngoMarket...', 'info');
+        addLog('✅ Firebase inicializado com sucesso!', 'success');
+
+        // ─── AUTH ──────────────────────────────────────────────
+        window.doSignUp = async function() {
+            const email = prompt('📧 Email:');
+            const pass  = prompt('🔑 Palavra-passe (6+ caracteres):');
+            if (!email || !pass) return;
+            if (pass.length < 6) { showStatus('❌ Palavra-passe muito curta!', true); return; }
+            try {
+                await createUserWithEmailAndPassword(auth, email, pass);
+                showStatus('✅ Conta criada com sucesso!');
+            } catch (e) {
+                showStatus('❌ ' + e.message, true);
+            }
+        };
+
+        window.doSignIn = async function() {
+            const email = prompt('📧 Email:');
+            const pass  = prompt('🔑 Palavra-passe:');
+            if (!email || !pass) return;
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                showStatus('✅ Sessão iniciada!');
+            } catch (e) {
+                showStatus('❌ ' + e.message, true);
+            }
+        };
+
+        window.doSignOut = async function() {
+            try {
+                await signOut(auth);
+                showStatus('✅ Sessão terminada');
+            } catch (e) {
+                addLog('❌ ' + e.message, 'error');
+            }
+        };
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                showStatus('✅ Ligado: ' + user.email);
+                addLog('👤 Utilizador: ' + user.email, 'success');
+            } else {
+                showStatus('🔓 Não ligado');
+                addLog('👤 Utilizador desligado', 'info');
+            }
+        });
+
+        // ─── PRODUTOS ──────────────────────────────────────────
+        window.showForm = function() {
+            if (!auth.currentUser) { showStatus('❌ Inicie sessão para publicar!', true); return; }
+            document.getElementById('formBox').style.display = 'block';
+        };
+
+        window.hideForm = function() {
+            document.getElementById('formBox').style.display = 'none';
+        };
+
+        window.publishProduct = async function() {
+            const user = auth.currentUser;
+            if (!user) { showStatus('❌ Inicie sessão primeiro!', true); return; }
+
+            const title    = document.getElementById('title').value.trim();
+            const price    = parseFloat(document.getElementById('price').value);
+            const desc     = document.getElementById('desc').value.trim();
+            const location = document.getElementById('location').value.trim();
+
+            if (!title || !price || !desc || !location) {
+                showStatus('❌ Todos os campos são obrigatórios!', true); return;
+            }
+
+            try {
+                await addDoc(collection(db, 'products'), {
+                    title, price, description: desc, location,
+                    userId: user.uid, userEmail: user.email,
+                    createdAt: serverTimestamp()   // ✅ Melhor que new Date()
+                });
+                showStatus('✅ Produto publicado!');
+                addLog('✅ Produto publicado: ' + title, 'success');
+                ['title','price','desc','location'].forEach(id => document.getElementById(id).value = '');
+                hideForm();
+                loadProducts();
+            } catch (e) {
+                showStatus('❌ ' + e.message, true);
+                addLog('❌ Erro: ' + e.message, 'error');
+            }
+        };
+
+        window.loadProducts = async function() {
+            const el = document.getElementById('products');
+            el.innerHTML = '<h3>🛍️ Últimos produtos</h3><p>⏳ A carregar...</p>';
+            addLog('🔄 A carregar produtos...', 'info');
+
+            try {
+                const q        = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(20));
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    el.innerHTML = '<h3>🛍️ Últimos produtos</h3><p>📭 Nenhum produto por enquanto</p>';
+                    addLog('📭 Nenhum produto encontrado', 'info');
+                    return;
+                }
+
+                let html = '<h3>🛍️ Últimos produtos</h3>';
+                snapshot.forEach(doc => {
+                    const d    = doc.data();
+                    const prix = d.price ? d.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : '0';
+                    html += `
+                        <div class="product-item">
+                            <b>${escapeHtml(d.title)}</b>
+                            <span class="price">${prix} AOA</span>
+                            <p style="color:#555;margin:5px 0;">${escapeHtml(d.description)}</p>
+                            <small style="color:#999;">📍 ${escapeHtml(d.location)}</small><br>
+                            <small style="color:#999;">Por ${escapeHtml(d.userEmail || 'Anónimo')}</small>
+                        </div>`;
+                });
+                el.innerHTML = html;
+                addLog('✅ ' + snapshot.size + ' produto(s) carregado(s)', 'success');
+
+            } catch (e) {
+                el.innerHTML = '<h3>🛍️ Últimos produtos</h3><p style="color:red;">❌ ' + e.message + '</p>';
+                showStatus('❌ Erro: ' + e.message, true);
+                addLog('❌ Erro ao carregar: ' + e.message, 'error');
+            }
+        };
+
+        // ─── ARRANQUE ──────────────────────────────────────────
+        setTimeout(loadProducts, 1000);
+        addLog('✅ AngoMarket pronto!', 'success');
+    </script>
+</body>
+</html>
