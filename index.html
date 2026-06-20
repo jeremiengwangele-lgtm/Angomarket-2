@@ -357,6 +357,98 @@ body{background:var(--gray);min-height:100vh;}
 <div id="toast"></div>
 
 <script type="module">
+  // ===== GESTION DU PANIER =====
+let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+window.addToCart = function(productId) {
+  const p = allP.find(x => x.id === productId);
+  if (!p) return;
+  
+  const existing = cart.find(item => item.id === productId);
+  if (existing) {
+    existing.quantity = (existing.quantity || 1) + 1;
+  } else {
+    cart.push({ ...p, quantity: 1 });
+  }
+  
+  localStorage.setItem('cart', JSON.stringify(cart));
+  toast('✅ ' + p.title + ' adicionado ao carrinho!');
+  updateCartBadge();
+};
+
+window.removeFromCart = function(productId) {
+  cart = cart.filter(item => item.id !== productId);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  renderCart();
+  updateCartBadge();
+};
+
+window.updateQuantity = function(productId, delta) {
+  const item = cart.find(x => x.id === productId);
+  if (!item) return;
+  item.quantity = Math.max(1, (item.quantity || 1) + delta);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  renderCart();
+};
+
+function updateCartBadge() {
+  const total = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  const badge = document.getElementById('cartBadge');
+  if (badge) {
+    badge.textContent = total;
+    badge.style.display = total > 0 ? 'block' : 'none';
+  }
+}
+
+window.renderCart = function() {
+  const container = document.getElementById('cartContent');
+  const totalDiv = document.getElementById('cartTotal');
+  
+  if (!cart.length) {
+    container.innerHTML = `<div class="empty"><div class="ic">🛒</div><p data-key="emptyCart">Seu carrinho está vazio</p></div>`;
+    totalDiv.style.display = 'none';
+    return;
+  }
+  
+  let html = '';
+  let total = 0;
+  
+  cart.forEach(item => {
+    const subtotal = item.price * (item.quantity || 1);
+    total += subtotal;
+    html += `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray2);">
+        <div style="width:50px;height:50px;background:var(--gray2);border-radius:8px;overflow:hidden;flex-shrink:0;">
+          ${item.photos && item.photos[0] ? `<img src="${item.photos[0]}" style="width:100%;height:100%;object-fit:cover;">` : '📷'}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:600;font-size:.85rem;">${esc(item.title)}</div>
+          <div style="color:var(--red);font-weight:700;font-size:.85rem;">${fmt(item.price)} AOA</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <button onclick="updateQuantity('${item.id}',-1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gray2);background:#fff;font-size:1rem;cursor:pointer;">−</button>
+          <span style="font-weight:700;min-width:24px;text-align:center;">${item.quantity || 1}</span>
+          <button onclick="updateQuantity('${item.id}',1)" style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gray2);background:#fff;font-size:1rem;cursor:pointer;">+</button>
+        </div>
+        <button onclick="removeFromCart('${item.id}')" style="background:none;border:none;color:var(--red);font-size:1.1rem;cursor:pointer;">🗑️</button>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+  totalDiv.style.display = 'block';
+  document.getElementById('cartTotalPrice').textContent = fmt(total) + ' AOA';
+  updateCartBadge();
+};
+
+window.checkout = function() {
+  if (!cart.length) { toast('⚠️ Carrinho vazio'); return; }
+  if (!CU) { toast('⚠️ Faça login para finalizar'); return; }
+  
+  const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+  toast('🛒 Total: ' + fmt(total) + ' AOA - Funcionalidade em desenvolvimento');
+  // Ici vous pouvez ajouter l'intégration de paiement (ex: via API)
+};
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 import{getFirestore,collection,addDoc,getDocs,getDoc,doc,deleteDoc,orderBy,query,limit,serverTimestamp,onSnapshot,where,setDoc,updateDoc}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
