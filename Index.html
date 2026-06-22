@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>AngoMarket V3.1 - OTP + Anúncios</title>
+  <style>
+    /* --- RESET & BASE --- */
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      margin: 0;
+      background: #f2f2f2;
+      padding-top: 70px;
+      padding-bottom: 80px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #fff;
+      transition: 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #cc0000;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(204,0,0,0.1);
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 18px;
+      background: #cc0000;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary { background: #444; }
+    .btn-success { background: #1a8a3f; }
+    .btn-danger { background: #dc3545; }
+    .btn-small { padding: 8px 16px; font-size: 13px; width: auto; display: inline-block; margin: 5px 5px 0 0; }
+
+    /* --- TOPBAR --- */
+    .topbar {
+      position: fixed; top: 0; left: 0; width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      z-index: 900;
+    }
+    .logo {
+      font-weight: 800;
+      color: #cc0000;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+    }
+    .search-container { flex: 1; margin: 0 12px; }
+    .search-bar {
+      width: 100%; padding: 8px 18px;
+      border-radius: 30px; border: 1px solid #ddd;
+      background: #f8f8f8;
+      font-size: 14px;
+    }
+    .menuBtn {
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+
+    /* --- MENU LATERAL --- */
+    .menu-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+    }
+    .sideMenu {
+      position: fixed; top: 0; left: -280px;
+      width: 260px; height: 100%;
+      background: white;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+      padding: 20px 10px;
+      transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+    .sideMenu a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      color: #1a1a1a;
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: 12px;
+      transition: 0.15s;
+    }
+    .sideMenu a:hover { background: #f5f5f5; }
+    .sideMenu .menu-close { text-align: right; font-size: 28px; padding: 0 8px; cursor: pointer; }
+
+    /* --- AUTH BOX --- */
+    .authBox {
+      max-width: 380px;
+      margin: 20px auto;
+      background: white;
+      padding: 25px 22px;
+      border-radius: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #eee;
+    }
+    .auth-tab {
+      flex: 1; text-align: center; padding: 12px 0;
+      cursor: pointer; color: #888; font-weight: 600;
+      border-bottom: 3px solid transparent;
+      transition: 0.2s;
+    }
+    .auth-tab.active { color: #cc0000; border-bottom-color: #cc0000; }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+
+    /* --- VIEWS (APP) --- */
+    .app { display: none; }
+    .view { display: none; padding: 16px; max-width: 700px; margin: 0 auto; }
+    .active-view { display: block; }
+
+    /* --- CARDS / ANÚNCIOS --- */
+    .product-card {
+      background: white;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid #ebebeb;
+    }
+    .product-card h4 { margin: 0 0 6px; color: #1a1a1a; }
+    .product-card .meta { color: #666; font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .product-card .phone { color: #cc0000; font-weight: 600; }
+    .product-card .actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* --- CAROUSEL DE FOTOS --- */
+    .carousel-container {
+      position: relative;
+      width: 100%;
+      max-height: 350px;
+      overflow: hidden;
+      border-radius: 12px;
+      margin: 8px 0;
+      background: #f0f0f0;
+    }
+    .carousel-slides {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+    .carousel-slide {
+      min-width: 100%;
+      max-height: 350px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f0f0f0;
+    }
+    .carousel-slide img {
+      width: 100%;
+      height: 350px;
+      object-fit: contain;
+      background: #f0f0f0;
+    }
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 20px;
+      border-radius: 50%;
+      width: auto;
+      z-index: 10;
+      margin: 0;
+    }
+    .carousel-btn:hover { background: rgba(0,0,0,0.8); }
+    .carousel-btn.prev { left: 8px; }
+    .carousel-btn.next { right: 8px; }
+    .carousel-dots {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+    .carousel-dot.active { background: white; }
+
+    .fab-btn {
+      position: fixed; bottom: 24px; right: 20px;
+      background: #cc0000; color: white; border: none;
+      padding: 16px 26px; border-radius: 50px;
+      font-weight: 700; font-size: 16px;
+      box-shadow: 0 6px 20px rgba(204,0,0,0.35);
+      z-index: 800;
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer;
+    }
+
+    /* --- FORMULÁRIO ANÚNCIO --- */
+    .form-anuncio input, .form-anuncio select, .form-anuncio textarea {
+      background: #fafafa;
+    }
+    .form-anuncio .photo-preview {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+    }
+    .photo-preview img {
+      width: 80px; height: 80px; object-fit: cover;
+      border-radius: 8px; border: 1px solid #ddd;
+    }
+    .profile-data { background: #f8f8f8; padding: 14px; border-radius: 16px; }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #cc0000;
+      margin: 0 auto 12px;
+      display: block;
+    }
+    .edit-profile input { margin-top: 5px; }
+    .edit-profile button { margin-top: 8px; }
+
+    /* MISC */
+    .divider { margin: 20px 0; border: 0; border-top: 1px solid #e0e0e0; }
+    .text-center { text-align: center; }
+    .mt-1 { margin-top: 6px; }
+    .mt-2 { margin-top: 18px; }
+    .hidden { display: none; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  </style>
+</head>
+<body>
+<!-- AUTHENTIFICATION -->
+<div id="auth" class="authBox">
+  <h2 style="text-align:center; color:#cc0000; margin:0 0 6px;">🇦🇴 AngoMarket</h2>
+  <p style="text-align:center; color:#777; font-size:14px; margin-top:-4px;">Compre e venda em Angola</p>
+
+  <div class="auth-tabs">
+    <div class="auth-tab active" onclick="switchAuthTab('login')">Entrar</div>
+    <div class="auth-tab" onclick="switchAuthTab('register')">Registar</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="form-login" class="auth-form active">
+    <input id="loginEmail" type="email" placeholder="E-mail (ou telefone)">
+    <input id="loginPassword" type="password" placeholder="Senha">
+    <button onclick="loginEmail()">Entrar</button>
+    <hr class="divider">
+    <p style="font-size:12px; color:#888; text-align:center;">Use a opção "Registar" com número +244</p>
+  </div>
+
+  <!-- REGISTER OTP -->
+  <div id="form-register" class="auth-form">
+    <input id="regName" type="text" placeholder="Nome completo">
+    <input id="regPhone" type="tel" placeholder="+244 900 000 000">
+    <div id="recaptcha-container" style="margin-top:12px;"></div>
+    <button id="btnSendOTP" onclick="sendOTP()">📱 Receber código SMS</button>
+
+    <div id="otp-section" style="display:none; margin-top:16px; padding-top:12px; border-top:1px dashed #ccc;">
+      <p style="font-size:13px; color:#555;">Digite o código de 6 dígitos enviado</p>
+      <input id="otpCode" type="text" placeholder="Ex: 123456">
+      <button class="btn-success" onclick="verifyOTP()">✅ Confirmar conta</button>
+    </div>
+  </div>
+</div>
+<!-- APP PRINCIPAL -->
+<div id="app" class="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="menuBtn" onclick="toggleMenu()">☰</div>
+    <div class="logo">AngoMarket</div>
+    <div class="search-container">
+      <input type="text" class="search-bar" id="searchInput" placeholder="Pesquisar anúncios..." oninput="filterAds()">
+    </div>
+  </div>
+
+  <!-- OVERLAY MENU -->
+  <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+  <!-- MENU LATERAL -->
+  <div class="sideMenu" id="menu">
+    <div class="menu-close" onclick="toggleMenu()">✕</div>
+    <a onclick="switchView('homeView')">🏠 Início</a>
+    <a onclick="switchView('profileView')">👤 Perfil</a>
+    <a onclick="switchView('myAdsView')">📦 Meus Anúncios</a>
+    <a onclick="logout()" style="color:#cc0000;">🚪 Sair</a>
+  </div>
+
+  <!-- VIEW: HOME -->
+  <div id="homeView" class="view active-view">
+    <h3 style="margin-bottom:6px;">📌 Anúncios recentes</h3>
+    <p style="color:#666; font-size:14px;">Conecte-se com vendedores de todo o país</p>
+    <div id="adsContainer">
+      <!-- Os anúncios serão injetados aqui -->
+    </div>
+  </div>
+
+  <!-- VIEW: PERFIL -->
+  <div id="profileView" class="view">
+    <h3>👤 Meu Perfil</h3>
+    <div id="profileDisplay" class="profile-data">
+      <img id="profileAvatar" class="profile-avatar" src="https://ui-avatars.com/api/?name=User&background=cc0000&color=fff&size=80" alt="Avatar">
+      <p><strong>Nome:</strong> <span id="pName">---</span></p>
+      <p><strong>Telefone:</strong> <span id="pPhone">---</span></p>
+      <p><strong>Membro desde:</strong> <span id="pDate">---</span></p>
+    </div>
+    <button class="btn-secondary" onclick="toggleEditProfile()" style="margin-top:15px;">✏️ Editar Perfil</button>
+    
+    <div id="editProfileForm" class="edit-profile" style="display:none; margin-top:15px;">
+      <input id="editName" type="text" placeholder="Novo nome">
+      <input id="editPhone" type="tel" placeholder="Novo telefone">
+      <input id="editAvatar" type="url" placeholder="URL da foto de perfil (opcional)">
+      <button class="btn-success" onclick="saveProfile()">💾 Salvar alterações</button>
+      <button class="btn-secondary" onclick="toggleEditProfile()">Cancelar</button>
+    </div>
+    
+    <button class="btn-secondary" onclick="logout()" style="margin-top:25px;">Sair da conta</button>
+  </div>
+
+  <!-- VIEW: MEUS ANÚNCIOS -->
+  <div id="myAdsView" class="view">
+    <h3>📦 Meus Anúncios</h3>
+    <div id="myAdsContainer"><p style="color:#888;">Você ainda não publicou anúncios.</p></div>
+  </div>
+
+  <!-- BOTÃO FLUTUANTE PARA + ANÚNCIO -->
+  <div class="fab-btn" onclick="openAdForm()">➕ <span style="font-weight:400;">Novo Anúncio</span></div>
+</div>
+
+<!-- ============ FORMULÁRIO DE ANÚNCIO (MODAL) ============ -->
+<div id="adFormModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1200; padding:20px; align-items:center; justify-content:center;">
+  <div style="background:white; max-width:480px; width:100%; border-radius:28px; padding:24px; max-height:90vh; overflow-y:auto;">
+    <h3 style="margin-top:0;" id="modalTitle">➕ Publicar Anúncio</h3>
+    <div class="form-anuncio">
+      <input id="adTitle" placeholder="Título do produto / serviço">
+      <textarea id="adDesc" rows="2" placeholder="Descrição detalhada..."></textarea>
+      <select id="adProvince">
+        <option value="">Selecione a província</option>
+        <option>Luanda</option><option>Benguela</option><option>Huíla</option><option>Huambo</option>
+        <option>Bié</option><option>Moxico</option><option>Cuando Cubango</option><option>Zaire</option>
+        <option>Uíge</option><option>Cabinda</option><option>Lunda Norte</option><option>Lunda Sul</option>
+        <option>Malange</option><option>Namibe</option><option>Kwanza Norte</option><option>Kwanza Sul</option>
+        <option>Bengo</option><option>Cunene</option>
+      </select>
+      <input id="adPhone" placeholder="Telefone para contacto (ex: +244 900 000 000)">
+      <input id="adPrice" placeholder="Preço (opcional)">
+      
+      <label style="font-size:14px; color:#555; margin-top:12px; display:block;">📸 Fotos (máx 5)</label>
+      <input id="adPhotos" type="file" accept="image/*" multiple>
+      <div id="photoPreview" class="photo-preview"></div>
+
+      <button class="btn-success" id="publishBtn" onclick="publishAd()">Publicar Anúncio</button>
+      <button class="btn-secondary" onclick="closeAdForm()" style="margin-top:8px;">Cancelar</button>
+    </div>
+  </div>
+</div>
+<!-- ============ FIREBASE MODULES ============ -->
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js"
+  }
+}
+</script>
+
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { 
+  getAuth, signInWithEmailAndPassword, RecaptchaVerifier, 
+  signInWithPhoneNumber, onAuthStateChanged, signOut, updateProfile 
+} from "firebase/auth";
+import { 
+  getFirestore, doc, setDoc, getDoc, collection, addDoc, 
+  query, where, getDocs, onSnapshot, updateDoc, deleteDoc, orderBy,
+  serverTimestamp 
+} from "firebase/firestore";
+
+// --- CONFIG ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDj9GfibZ77BepNSaoZviqDF-qeNRcz064",
+  authDomain: "angomarket-1543f.firebaseapp.com",
+  projectId: "angomarket-1543f",
+  storageBucket: "angomarket-1543f.firebasestorage.app",
+  messagingSenderId: "14599437423",
+  appId: "1:14599437423:web:ec4401fd1e852928b2a19a"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// --- VARIÁVEIS GLOBAIS ---
+let currentUser = null;
+let currentUserData = null;
+let allAds = [];
+let currentAdId = null;
+// --- FUNÇÕES UI (expostas no window) ---
+window.switchAuthTab = (tab) => {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  if(tab === 'login') {
+    document.querySelectorAll('.auth-tab')[0].classList.add('active');
+    document.getElementById('form-login').classList.add('active');
+  } else {
+    document.querySelectorAll('.auth-tab')[1].classList.add('active');
+    document.getElementById('form-register').classList.add('active');
+  }
+};
+
+window.toggleMenu = () => {
+  const m = document.getElementById("menu");
+  const overlay = document.getElementById("menuOverlay");
+  if (m.style.left === "0px") { m.style.left = "-280px"; overlay.style.display = "none"; } 
+  else { m.style.left = "0px"; overlay.style.display = "block"; }
+};
+
+window.switchView = (viewId) => {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+  const el = document.getElementById(viewId);
+  if (el) el.classList.add('active-view');
+  document.getElementById("menu").style.left = "-280px";
+  document.getElementById("menuOverlay").style.display = "none";
+  if (viewId === 'profileView') loadProfile();
+  if (viewId === 'myAdsView') loadMyAds();
+};
+
+window.toggleEditProfile = () => {
+  const form = document.getElementById('editProfileForm');
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    document.getElementById('editName').value = document.getElementById('pName').textContent;
+    document.getElementById('editPhone').value = document.getElementById('pPhone').textContent;
+  } else {
+    form.style.display = 'none';
+  }
+};
+
+// --- OTP / REGISTO ---
+window.setupRecaptcha = () => {
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      'size': 'normal',
+      'callback': () => {}
+    });
+  }
+};
+
+window.sendOTP = async () => {
+  const phoneVal = document.getElementById("regPhone").value.trim();
+  const nameVal = document.getElementById("regName").value.trim();
+  if (!nameVal) { alert("Por favor, insira o nome completo."); return; }
+  const cleanPhone = phoneVal.replace(/\s/g, '');
+  if (!cleanPhone.startsWith("+244") || cleanPhone.length < 13) { 
+    alert("Número deve começar com +244 e ter 9 dígitos após o código (ex: +244900000000)."); 
+    return; 
+  }
+  document.getElementById("btnSendOTP").disabled = true;
+  document.getElementById("btnSendOTP").innerText = "Enviando...";
+  try {
+    window.setupRecaptcha();
+    const confirmationResult = await signInWithPhoneNumber(auth, cleanPhone, window.recaptchaVerifier);
+    window.confirmationResult = confirmationResult;
+    document.getElementById("otp-section").style.display = "block";
+    document.getElementById("btnSendOTP").style.display = "none";
+    document.getElementById("recaptcha-container").style.display = "none";
+    alert("Código SMS enviado!");
+  } catch (error) {
+    alert("Erro: " + error.message);
+    document.getElementById("btnSendOTP").disabled = false;
+    document.getElementById("btnSendOTP").innerText = "📱 Receber código SMS";
+  }
+};
+
+window.verifyOTP = async () => {
+  const code = document.getElementById("otpCode").value.trim();
+  const nameVal = document.getElementById("regName").value.trim();
+  const phoneVal = document.getElementById("regPhone").value.trim();
+  if (code.length !== 6) { alert("Digite os 6 dígitos do código."); return; }
+  try {
+    const result = await window.confirmationResult.confirm(code);
+    const user = result.user;
+    await setDoc(doc(db, "utilizadores", user.uid), {
+      nome: nameVal,
+      telefone: phoneVal.replace(/\s/g, ''),
+      dataInscricao: new Date().toISOString(),
+      uid: user.uid,
+      avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(nameVal) + '&background=cc0000&color=fff&size=80'
+    }, { merge: true });
+    alert("✅ Conta verificada e criada com sucesso!");
+    enterApp(user);
+  } catch (error) {
+    alert("Código inválido ou expirado. Tente novamente.");
+  }
+};
+
+// --- LOGIN (email) ---
+window.loginEmail = async () => {
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPassword").value;
+  if (!email || !pass) { alert("Preencha e-mail e senha."); return; }
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    enterApp(cred.user);
+  } catch(e) { alert("Erro: " + e.message); }
+};
+
+// --- ENTRAR NO APP ---
+function enterApp(user) {
+  currentUser = user;
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  loadProfile();
+  loadAds();
+  switchView('homeView');
+}
+
+// --- LOGOUT ---
+window.logout = async () => {
+  await signOut(auth);
+  location.reload();
+};
+// --- CARREGAR PERFIL ---
+async function loadProfile() {
+  if (!currentUser) return;
+  const ref = doc(db, "utilizadores", currentUser.uid);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    const data = snap.data();
+    currentUserData = data;
+    document.getElementById("pName").innerText = data.nome || '---';
+    document.getElementById("pPhone").innerText = data.telefone || '---';
+    document.getElementById("pDate").innerText = data.dataInscricao ? new Date(data.dataInscricao).toLocaleDateString('pt-PT') : '---';
+    if (data.avatar) {
+      document.getElementById("profileAvatar").src = data.avatar;
+    }
+  }
+}
+
+// --- SALVAR PERFIL ---
+window.saveProfile = async () => {
+  if (!currentUser) return;
+  const newName = document.getElementById('editName').value.trim();
+  const newPhone = document.getElementById('editPhone').value.trim();
+  const newAvatar = document.getElementById('editAvatar').value.trim();
+  
+  if (!newName) { alert("Nome é obrigatório."); return; }
+  if (!newPhone.startsWith("+244") || newPhone.length < 13) { 
+    alert("Telefone deve começar com +244 e ter 9 dígitos."); 
+    return; 
+  }
+  
+  try {
+    const ref = doc(db, "utilizadores", currentUser.uid);
+    const updateData = { nome: newName, telefone: newPhone };
+    if (newAvatar) updateData.avatar = newAvatar;
+    await updateDoc(ref, updateData);
+    
+    await updateProfile(currentUser, { displayName: newName });
+    
+    alert("✅ Perfil atualizado com sucesso!");
+    toggleEditProfile();
+    loadProfile();
+    loadAds();
+  } catch (e) {
+    alert("Erro ao salvar: " + e.message);
+  }
+};
+
+// --- OBSERVER DE AUTENTICAÇÃO ---
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    loadProfile();
+    loadAds();
+    switchView('homeView');
+  } else {
+    document.getElementById("auth").style.display = "block";
+    document.getElementById("app").style.display = "none";
+  }
+});
+
+// --- INICIALIZAR COM RECAPTCHA ---
+window.setupRecaptcha();
+// --- PUBLICAR ANÚNCIO ---
+window.openAdForm = (adId = null) => {
+  if (!currentUser) { alert("Faça login primeiro."); return; }
+  currentAdId = adId;
+  document.getElementById("adFormModal").style.display = "flex";
+  document.getElementById("photoPreview").innerHTML = '';
+  document.getElementById("adPhotos").value = '';
+  
+  if (adId) {
+    const ad = allAds.find(a => a.id === adId);
+    if (ad) {
+      document.getElementById("adTitle").value = ad.titulo || '';
+      document.getElementById("adDesc").value = ad.descricao || '';
+      document.getElementById("adProvince").value = ad.provincia || '';
+      document.getElementById("adPhone").value = ad.telefone || '';
+      document.getElementById("adPrice").value = ad.preco || '';
+      if (ad.fotos && ad.fotos.length > 0) {
+        const container = document.getElementById("photoPreview");
+        ad.fotos.forEach(f => {
+          const img = document.createElement('img');
+          img.src = f;
+          img.style.width = '80px'; img.style.height = '80px'; img.style.objectFit='cover';
+          img.style.borderRadius='8px'; img.style.border='1px solid #ddd';
+          container.appendChild(img);
+        });
+      }
+      document.getElementById('modalTitle').textContent = '✏️ Editar Anúncio';
+      document.getElementById('publishBtn').textContent = 'Atualizar Anúncio';
+    }
+  } else {
+    document.getElementById('modalTitle').textContent = '➕ Publicar Anúncio';
+    document.getElementById('publishBtn').textContent = 'Publicar Anúncio';
+  }
+};
+
+window.closeAdForm = () => {
+  document.getElementById("adFormModal").style.display = "none";
+  currentAdId = null;
+};
+
+// Preview de fotos
+document.addEventListener('change', (e) => {
+  if (e.target && e.target.id === 'adPhotos') {
+    const files = e.target.files;
+    const container = document.getElementById("photoPreview");
+    if (!currentAdId) container.innerHTML = '';
+    if (files.length > 5) { alert("Máximo 5 fotos."); e.target.value = ''; return; }
+    for (let f of files) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = document.createElement('img');
+        img.src = ev.target.result;
+        img.style.width = '80px'; img.style.height = '80px'; img.style.objectFit='cover';
+        img.style.borderRadius='8px'; img.style.border='1px solid #ddd';
+        container.appendChild(img);
+      };
+      reader.readAsDataURL(f);
+    }
+  }
+});
+
+window.publishAd = async () => {
+  if (!currentUser) { alert("Usuário não autenticado."); return; }
+  const title = document.getElementById("adTitle").value.trim();
+  const desc = document.getElementById("adDesc").value.trim();
+  const province = document.getElementById("adProvince").value;
+  const phone = document.getElementById("adPhone").value.trim();
+  const price = document.getElementById("adPrice").value.trim();
+
+  if (!title || !desc || !province || !phone) {
+    alert("Preencha título, descrição, província e telefone.");
+    return;
+  }
+  const cleanPhone = phone.replace(/\s/g, '');
+  if (!cleanPhone.startsWith("+244") && !cleanPhone.startsWith("0")) {
+    alert("Telefone deve começar com +244 ou 0 (ex: +244 900 000 000)");
+    return;
+  }
+
+  const fileInput = document.getElementById("adPhotos");
+  const files = fileInput.files;
+  let fotos = [];
+  
+  if (currentAdId && files.length === 0) {
+    const existingAd = allAds.find(a => a.id === currentAdId);
+    if (existingAd && existingAd.fotos) {
+      fotos = existingAd.fotos;
+    }
+  } else {
+    if (files.length > 5) { alert("Máximo 5 fotos."); return; }
+    for (let f of files) {
+      const b64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(f);
+      });
+      fotos.push(b64);
+    }
+  }
+
+  try {
+    const adData = {
+      titulo: title,
+      descricao: desc,
+      provincia: province,
+      telefone: cleanPhone,
+      preco: price || 'A combinar',
+      fotos: fotos,
+      uid: currentUser.uid,
+      nomeUsuario: currentUserData?.nome || 'Anónimo',
+      data: new Date().toISOString()
+    };
+
+    if (currentAdId) {
+      await updateDoc(doc(db, "anuncios", currentAdId), adData);
+      alert("✅ Anúncio atualizado com sucesso!");
+    } else {
+      await addDoc(collection(db, "anuncios"), adData);
+      alert("✅ Anúncio publicado com sucesso!");
+    }
+    
+    closeAdForm();
+    loadAds();
+    loadMyAds();
+    switchView('homeView');
+  } catch (e) {
+    alert("Erro: " + e.message);
+  }
+};
+
+// --- DELETAR ANÚNCIO ---
+window.deleteAd = async (adId) => {
+  if (!confirm("Tem certeza que deseja excluir este anúncio?")) return;
+  try {
+    await deleteDoc(doc(db, "anuncios", adId));
+    alert("🗑️ Anúncio excluído!");
+    loadAds();
+    loadMyAds();
+  } catch (e) {
+    alert("Erro ao excluir: " + e.message);
+  }
+};
+// --- CRIAR CAROUSEL PARA FOTOS ---
+function createCarousel(fotos) {
+  if (!fotos || fotos.length === 0) return '';
+  
+  const container = document.createElement('div');
+  container.className = 'carousel-container';
+  
+  const slidesWrapper = document.createElement('div');
+  slidesWrapper.className = 'carousel-slides';
+  slidesWrapper.dataset.index = '0';
+  
+  fotos.forEach((foto) => {
+    const slide = document.createElement('div');
+    slide.className = 'carousel-slide';
+    const img = document.createElement('img');
+    img.src = foto;
+    img.alt = 'Foto';
+    slide.appendChild(img);
+    slidesWrapper.appendChild(slide);
+  });
+  
+  container.appendChild(slidesWrapper);
+  
+  if (fotos.length > 1) {
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'carousel-btn prev';
+    prevBtn.textContent = '❮';
+    prevBtn.onclick = (e) => {
+      e.stopPropagation();
+      const slides = container.querySelector('.carousel-slides');
+      const currentIndex = parseInt(slides.dataset.index || '0');
+      const newIndex = (currentIndex - 1 + fotos.length) % fotos.length;
+      slides.style.transform = `translateX(-${newIndex * 100}%)`;
+      slides.dataset.index = newIndex;
+      updateDots(container, newIndex);
+    };
+    container.appendChild(prevBtn);
+    
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'carousel-btn next';
+    nextBtn.textContent = '❯';
+    nextBtn.onclick = (e) => {
+      e.stopPropagation();
+      const slides = container.querySelector('.carousel-slides');
+      const currentIndex = parseInt(slides.dataset.index || '0');
+      const newIndex = (currentIndex + 1) % fotos.length;
+      slides.style.transform = `translateX(-${newIndex * 100}%)`;
+      slides.dataset.index = newIndex;
+      updateDots(container, newIndex);
+    };
+    container.appendChild(nextBtn);
+    
+    const dotsContainer = document.createElement('div');
+    dotsContainer.className = 'carousel-dots';
+    fotos.forEach((_, index) => {
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot' + (index === 0 ? ' active' : '');
+      dot.onclick = (e) => {
+        e.stopPropagation();
+        const slides = container.querySelector('.carousel-slides');
+        slides.style.transform = `translateX(-${index * 100}%)`;
+        slides.dataset.index = index;
+        updateDots(container, index);
+      };
+      dotsContainer.appendChild(dot);
+    });
+    container.appendChild(dotsContainer);
+    
+    if (fotos.length > 3) {
+      let interval = setInterval(() => {
+        const slides = container.querySelector('.carousel-slides');
+        const currentIndex = parseInt(slides.dataset.index || '0');
+        const newIndex = (currentIndex + 1) % fotos.length;
+        slides.style.transform = `translateX(-${newIndex * 100}%)`;
+        slides.dataset.index = newIndex;
+        updateDots(container, newIndex);
+      }, 4000);
+      
+      container.onmouseenter = () => clearInterval(interval);
+      container.onmouseleave = () => {
+        interval = setInterval(() => {
+          const slides = container.querySelector('.carousel-slides');
+          const currentIndex = parseInt(slides.dataset.index || '0');
+          const newIndex = (currentIndex + 1) % fotos.length;
+          slides.style.transform = `translateX(-${newIndex * 100}%)`;
+          slides.dataset.index = newIndex;
+          updateDots(container, newIndex);
+        }, 4000);
+      };
+    }
+  }
+  return container;
+}
+
+function updateDots(container, activeIndex) {
+  const dots = container.querySelectorAll('.carousel-dot');
+  dots.forEach((dot, index) => {
+    dot.className = 'carousel-dot' + (index === activeIndex ? ' active' : '');
+  });
+}
+
+// --- CARREGAR ANÚNCIOS (HOME) ---
+function loadAds() {
+  const container = document.getElementById("adsContainer");
+  const q = query(collection(db, "anuncios"), orderBy("data", "desc"));
+  
+  onSnapshot(q, (snap) => {
+    allAds = [];
+    if (snap.empty) {
+      container.innerHTML = `<p style="color:#888; text-align:center;">Nenhum anúncio disponível. Seja o primeiro a publicar!</p>`;
+      return;
+    }
+    snap.forEach(doc => {
+      allAds.push({ id: doc.id, ...doc.data() });
+    });
+    renderAds(allAds);
+  });
+}
+
+function renderAds(ads) {
+  const container = document.getElementById("adsContainer");
+  if (ads.length === 0) {
+    container.innerHTML = `<p style="color:#888; text-align:center;">Nenhum anúncio encontrado.</p>`;
+    return;
+  }
+  
+  let html = '';
+  ads.forEach(ad => {
+    const fotos = ad.fotos || [];
+    const isOwner = currentUser && ad.uid === currentUser.uid;
+    const carouselId = 'carousel-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    
+    html += `
+      <div class="product-card" data-ad-id="${ad.id}">
+        <h4>${ad.titulo || 'Sem título'}</h4>
+        <div class="meta">
+          <span>📍 ${ad.provincia || '---'}</span>
+          <span class="phone">📞 ${ad.telefone || '---'}</span>
+          <span>💰 ${ad.preco || 'A combinar'}</span>
+        </div>
+        <p style="font-size:14px; color:#444; margin:8px 0;">${ad.descricao || ''}</p>
+    `;
+    
+    if (fotos.length > 0) {
+      html += `<div id="${carouselId}"></div>`;
+    }
+    
+    html += `
+        <div style="font-size:12px; color:#999; margin-top:8px;">
+          por ${ad.nomeUsuario || 'Anónimo'} • ${ad.data ? new Date(ad.data).toLocaleDateString('pt-PT') : ''}
+        </div>
+    `;
+    
+    if (isOwner) {
+      html += `
+        <div class="actions">
+          <button class="btn-small btn-success" onclick="openAdForm('${ad.id}')">✏️ Editar</button>
+          <button class="btn-small btn-danger" onclick="deleteAd('${ad.id}')">🗑️ Excluir</button>
+        </div>
+      `;
+    }
+    
+    html += `</div>`;
+  });
+  
+  container.innerHTML = html;
+  
+  setTimeout(() => {
+    document.querySelectorAll('.product-card').forEach(card => {
+      const carouselDiv = card.querySelector('[id^="carousel-"]');
+      if (carouselDiv) {
+        const adId = card.dataset.adId;
+        const ad = allAds.find(a => a.id === adId);
+        if (ad && ad.fotos && ad.fotos.length > 0) {
+          const carousel = createCarousel(ad.fotos);
+          carouselDiv.parentNode.replaceChild(carousel, carouselDiv);
+        }
+      }
+    });
+  }, 100);
+}
+
+// --- FILTRAR ANÚNCIOS ---
+window.filterAds = () => {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (!searchTerm) {
+    renderAds(allAds);
+    return;
+  }
+  const filtered = allAds.filter(ad => 
+    (ad.titulo && ad.titulo.toLowerCase().includes(searchTerm)) ||
+    (ad.descricao && ad.descricao.toLowerCase().includes(searchTerm)) ||
+    (ad.provincia && ad.provincia.toLowerCase().includes(searchTerm)) ||
+    (ad.nomeUsuario && ad.nomeUsuario.toLowerCase().includes(searchTerm))
+  );
+  renderAds(filtered);
+};
+
+// --- CARREGAR MEUS ANÚNCIOS ---
+async function loadMyAds() {
+  if (!currentUser) return;
+  const container = document.getElementById("myAdsContainer");
+  const q = query(
+    collection(db, "anuncios"), 
+    where("uid", "==", currentUser.uid),
+    orderBy("data", "desc")
+  );
+  const snap = await getDocs(q);
+  if (snap.empty) {
+    container.innerHTML = `<p style="color:#888;">Você ainda não publicou anúncios.</p>`;
+    return;
+  }
+  let html = '';
+  snap.forEach(doc => {
+    const ad = { id: doc.id, ...doc.data() };
+    const fotos = ad.fotos || [];
+    html += `
+      <div class="product-card">
+        <h4>${ad.titulo || 'Sem título'}</h4>
+        <div class="meta">
+          <span>📍 ${ad.provincia || '---'}</span>
+          <span class="phone">📞 ${ad.telefone || '---'}</span>
+          <span>💰 ${ad.preco || 'A combinar'}</span>
+        </div>
+        <p style="font-size:14px;">${ad.descricao || ''}</p>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
+          ${fotos.slice(0,3).map(f => `<img src="${f}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #ddd;">`).join('')}
+          ${fotos.length > 3 ? `<span style="display:flex;align-items:center;color:#888;">+${fotos.length - 3}</span>` : ''}
+        </div>
+        <div class="actions">
+          <button class="btn-small btn-success" onclick="openAdForm('${ad.id}')">✏️ Editar</button>
+          <button class="btn-small btn-danger" onclick="deleteAd('${ad.id}')">🗑️ Excluir</button>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+</script>
+</body>
+</html>
