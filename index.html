@@ -412,7 +412,7 @@
     </div>
   </div>
         </div>
-        <!-- ============ FIREBASE MODULES ============ -->
+<!-- ============ FIREBASE MODULES ============ -->
 <script type="importmap">
 {
   "imports": {
@@ -426,13 +426,20 @@
 <script type="module">
 import { initializeApp } from "firebase/app";
 import { 
-  getAuth, signInWithEmailAndPassword, RecaptchaVerifier, 
-  signInWithPhoneNumber, onAuthStateChanged, signOut, updateProfile 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  onAuthStateChanged, 
+  signOut, 
+  updateProfile 
 } from "firebase/auth";
 import { 
-  getFirestore, doc, setDoc, getDoc, collection, addDoc, 
+  getFirestore, 
+  doc, setDoc, getDoc, collection, addDoc, 
   query, where, getDocs, onSnapshot, updateDoc, deleteDoc, orderBy,
-  arrayUnion, arrayRemove, serverTimestamp 
+  arrayUnion, arrayRemove
 } from "firebase/firestore";
 
 // --- CONFIG ---
