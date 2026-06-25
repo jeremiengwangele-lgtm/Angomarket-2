@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>AngoMarket V3.2</title>
+  <style>
+    /* --- RESET & BASE --- */
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      margin: 0;
+      background: #f2f2f2;
+      padding-top: 70px;
+      padding-bottom: 80px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #fff;
+      transition: 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #cc0000;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(204,0,0,0.1);
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 18px;
+      background: #cc0000;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary { background: #444; }
+    .btn-success { background: #1a8a3f; }
+    .btn-danger { background: #dc3545; }
+    .btn-outline { background: transparent; border: 2px solid #cc0000; color: #cc0000; }
+    .btn-small { padding: 8px 16px; font-size: 13px; width: auto; display: inline-block; margin: 5px 5px 0 0; }
+
+    /* --- TOPBAR --- */
+    .topbar {
+      position: fixed; top: 0; left: 0; width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      z-index: 900;
+    }
+    .logo {
+      font-weight: 800;
+      color: #cc0000;
+      font-size: 22px;
+      letter-spacing: -0.5px;
+    }
+    .search-container { flex: 1; margin: 0 12px; }
+    .search-bar {
+      width: 100%; padding: 8px 18px;
+      border-radius: 30px; border: 1px solid #ddd;
+      background: #f8f8f8;
+      font-size: 14px;
+    }
+    .menuBtn {
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+
+    /* --- MENU LATERAL --- */
+    .menu-overlay {
+      display: none;
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+    }
+    .sideMenu {
+      position: fixed; top: 0; left: -280px;
+      width: 260px; height: 100%;
+      background: white;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+      padding: 20px 10px;
+      transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+    .sideMenu a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      color: #1a1a1a;
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: 12px;
+      transition: 0.15s;
+    }
+    .sideMenu a:hover { background: #f5f5f5; }
+    .sideMenu .menu-close { text-align: right; font-size: 28px; padding: 0 8px; cursor: pointer; }
+
+    /* --- AUTH BOX --- */
+    .authBox {
+      max-width: 380px;
+      margin: 20px auto;
+      background: white;
+      padding: 25px 22px;
+      border-radius: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #eee;
+    }
+    .auth-tab {
+      flex: 1; text-align: center; padding: 12px 0;
+      cursor: pointer; color: #888; font-weight: 600;
+      border-bottom: 3px solid transparent;
+      transition: 0.2s;
+    }
+    .auth-tab.active { color: #cc0000; border-bottom-color: #cc0000; }
+    .auth-form { display: none; }
+    .auth-form.active { display: block; }
+
+    /* --- VIEWS (APP) --- */
+    .app { display: none; }
+    .view { display: none; padding: 16px; max-width: 700px; margin: 0 auto; }
+    .active-view { display: block; }
+
+    /* --- CARDS / ANÚNCIOS --- */
+    .product-card {
+      background: white;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid #ebebeb;
+    }
+    .product-card h4 { margin: 0 0 6px; color: #1a1a1a; }
+    .product-card .meta { color: #666; font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .product-card .phone { color: #cc0000; font-weight: 600; }
+    .product-card .actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* --- CAROUSEL DE FOTOS --- */
+    .carousel-container {
+      position: relative;
+      width: 100%;
+      max-height: 350px;
+      overflow: hidden;
+      border-radius: 12px;
+      margin: 8px 0;
+      background: #f0f0f0;
+    }
+    .carousel-slides {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+    .carousel-slide {
+      min-width: 100%;
+      max-height: 350px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f0f0f0;
+    }
+    .carousel-slide img {
+      width: 100%;
+      height: 350px;
+      object-fit: contain;
+      background: #f0f0f0;
+    }
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 20px;
+      border-radius: 50%;
+      width: auto;
+      z-index: 10;
+      margin: 0;
+    }
+    .carousel-btn:hover { background: rgba(0,0,0,0.8); }
+    .carousel-btn.prev { left: 8px; }
+    .carousel-btn.next { right: 8px; }
+    .carousel-dots {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+    .carousel-dot.active { background: white; }
+
+    .fab-btn {
+      position: fixed; bottom: 24px; right: 20px;
+      background: #cc0000; color: white; border: none;
+      padding: 16px 26px; border-radius: 50px;
+      font-weight: 700; font-size: 16px;
+      box-shadow: 0 6px 20px rgba(204,0,0,0.35);
+      z-index: 800;
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer;
+    }
+
+    /* --- FORMULÁRIO ANÚNCIO --- */
+    .form-anuncio input, .form-anuncio select, .form-anuncio textarea {
+      background: #fafafa;
+    }
+    .form-anuncio .photo-preview {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+    }
+    .photo-preview img {
+      width: 80px; height: 80px; object-fit: cover;
+      border-radius: 8px; border: 1px solid #ddd;
+    }
+    .profile-data { background: #f8f8f8; padding: 14px; border-radius: 16px; }
+    .profile-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #cc0000;
+      margin: 0 auto 12px;
+      display: block;
+    }
+    .edit-profile input { margin-top: 5px; }
+    .edit-profile button { margin-top: 8px; }
+
+    /* MISC */
+    .divider { margin: 20px 0; border: 0; border-top: 1px solid #e0e0e0; }
+    .text-center { text-align: center; }
+    .mt-1 { margin-top: 6px; }
+    .mt-2 { margin-top: 18px; }
+    .hidden { display: none; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+    /* TOAST */
+    #toastMsg {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+      background: #222; color: white; padding: 12px 22px;
+      border-radius: 30px; font-size: 14px; font-weight: 600;
+      z-index: 9999; opacity: 0; transition: opacity 0.3s;
+      pointer-events: none; white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      max-width: 90vw; text-align: center;
+    }
+    #toastMsg.show { opacity: 1; }
+
+    /* NOTIFICAÇÕES */
+    .notif-card {
+      background: white; border-radius: 14px; padding: 14px 16px;
+      margin-bottom: 10px; border-left: 4px solid #cc0000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .notif-card.lida { border-left-color: #ddd; opacity: 0.7; }
+    .notif-icon { font-size: 22px; flex-shrink: 0; }
+    .notif-text { flex: 1; font-size: 14px; color: #333; }
+    .notif-time { font-size: 11px; color: #bbb; margin-top: 4px; }
+
+    /* SEGUIDORES NO PERFIL */
+    .follower-item {
+      display: flex; align-items: center; gap: 10px;
+      background: white; border-radius: 12px; padding: 10px 14px;
+      margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+  </style>
+</head>
+<body>
+  <!-- TOAST -->
+<div id="toastMsg"></div>
+
+<!-- AUTHENTIFICATION -->
+<div id="auth" class="authBox">
+  <h2 style="text-align:center; color:#cc0000; margin:0 0 6px;">🇦🇴 AngoMarket</h2>
+  <p style="text-align:center; color:#777; font-size:14px; margin-top:-4px;">Compre e venda em Angola</p>
+
+  <div class="auth-tabs">
+    <div class="auth-tab active" onclick="switchAuthTab('login')">Entrar</div>
+    <div class="auth-tab" onclick="switchAuthTab('register')">Registar</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="form-login" class="auth-form active">
+    <input id="loginEmail" type="email" placeholder="E-mail">
+    <input id="loginPassword" type="password" placeholder="Senha">
+    <button onclick="loginEmail()">Entrar</button>
+    <hr class="divider">
+    <p style="font-size:12px; color:#888; text-align:center;">
+      <a href="#" onclick="sendPasswordReset()" style="color:#cc0000;">Esqueceu a senha?</a>
+    </p>
+  </div>
+
+  <!-- REGISTER (EMAIL) -->
+  <div id="form-register" class="auth-form">
+    <input id="regName" type="text" placeholder="Nome completo">
+    <input id="regEmail" type="email" placeholder="E-mail">
+    <input id="regPassword" type="password" placeholder="Senha (mínimo 6 caracteres)">
+    <input id="regConfirmPassword" type="password" placeholder="Confirmar senha">
+    
+    
+    <button id="btnRegister" onclick="registerEmail()">📧 Criar conta</button>
+    
+    <div id="verification-section" style="display:none; margin-top:16px; padding-top:12px; border-top:1px dashed #ccc;">
+      <p style="font-size:13px; color:#555;">
+        ✅ Um email de verificação foi enviado para <span id="verifyEmailDisplay" style="font-weight:bold;">seu email</span>.
+      </p>
+      <p style="font-size:13px; color:#555;">
+        Clique no link no email para ativar sua conta.
+      </p>
+      <button class="btn-secondary" onclick="resendVerificationEmail()" style="margin-top:10px;">
+        🔄 Reenviar email de verificação
+      </button>
+      <button class="btn-success" onclick="checkEmailVerified()" style="margin-top:10px;">
+        ✅ Já verifiquei, entrar
+      </button>
+    </div>
+  </div>
+</div>
+<!-- APP PRINCIPAL -->
+<div id="app" class="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="menuBtn" onclick="toggleMenu()">☰</div>
+    <div class="logo">AngoMarket</div>
+    <div class="search-container">
+      <input type="text" class="search-bar" id="searchInput" placeholder="Pesquisar anúncios..." oninput="filterAds()">
+    </div>
+    <div onclick="switchView('notificacoesView')" style="position:relative;cursor:pointer;padding:4px 6px;flex-shrink:0;">
+      ◎
+      <span id="notifBadgeTop" style="display:none;position:absolute;top:-2px;right:-2px;background:#cc0000;color:white;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center;">0</span>
+    </div>
+    <div style="flex-shrink:0;margin-left:4px;">
+      <select id="langSelect" onchange="setLang(this.value)" style="padding:4px 6px;font-size:12px;border-radius:8px;border:1px solid #ddd;background:#f8f8f8;margin:0;width:auto;cursor:pointer;">
+        <option value="pt">PT</option>
+        <option value="fr">FR</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- OVERLAY MENU -->
+  <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+  <!-- MENU LATERAL -->
+  <div class="sideMenu" id="menu">
+    <div class="menu-close" onclick="toggleMenu()">✕</div>
+    <a onclick="switchView('homeView')">⊞ Início</a>
+    <a onclick="switchView('profileView')">◉ Perfil</a>
+    <a onclick="switchView('myAdsView')">☰ Meus Anúncios</a>
+    <a onclick="switchView('followingView')">⊕ Seguindo</a>
+    <a onclick="switchView('notificacoesView')" style="position:relative;">◎ Notificações <span id="notifBadge" style="display:none;background:#cc0000;color:white;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px;">0</span></a>
+    <a onclick="logout()" style="color:#cc0000;">← Sair</a>
+  </div>
+
+  <!-- VIEW: HOME -->
+  <div id="homeView" class="view active-view">
+    <h3 style="margin-bottom:6px;">Anúncios recentes</h3>
+    <p style="color:#666; font-size:14px;">Conecte-se com vendedores de todo o país</p>
+    <div id="adsContainer"></div>
+  </div>
+
+  <!-- VIEW: PERFIL -->
+  <div id="profileView" class="view">
+    <h3>Meu Perfil</h3>
+    <div id="profileDisplay" class="profile-data">
+      <img id="profileAvatar" class="profile-avatar" src="https://ui-avatars.com/api/?name=User&background=cc0000&color=fff&size=80" alt="Avatar">
+      <p><strong>Nome:</strong> <span id="pName">---</span></p>
+      <p><strong>Telefone:</strong> <span id="pPhone">---</span></p>
+      <p><strong>Membro desde:</strong> <span id="pDate">---</span></p>
+      <div style="display:flex;gap:16px;margin-top:10px;">
+        <div style="text-align:center;background:white;padding:10px 18px;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div id="pFollowersCount" style="font-size:22px;font-weight:800;color:#cc0000;">0</div>
+          <div style="font-size:12px;color:#888;">Seguidores</div>
+        </div>
+        <div style="text-align:center;background:white;padding:10px 18px;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div id="pFollowingCount" style="font-size:22px;font-weight:800;color:#1a8a3f;">0</div>
+          <div style="font-size:12px;color:#888;">A seguir</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de seguidores -->
+    <div style="margin-top:16px;">
+      <h4 style="margin-bottom:8px;">👥 Pessoas que me seguem</h4>
+      <div id="myFollowersList"><p style="color:#888;font-size:14px;">Carregando...</p></div>
+    </div>
+
+    <button class="btn-secondary" onclick="toggleEditProfile()" style="margin-top:15px;">✏️ Editar Perfil</button>
+    
+    <div id="editProfileForm" class="edit-profile" style="display:none; margin-top:15px;">
+      <input id="editName" type="text" placeholder="Novo nome">
+      <input id="editPhone" type="tel" placeholder="Novo telefone">
+      <input id="editAvatar" type="url" placeholder="URL da foto de perfil (opcional)">
+      <button class="btn-success" onclick="saveProfile()">💾 Salvar alterações</button>
+      <button class="btn-secondary" onclick="toggleEditProfile()">Cancelar</button>
+    </div>
+    
+    <button class="btn-secondary" onclick="logout()" style="margin-top:25px;">Sair da conta</button>
+  </div>
+
+  <!-- VIEW: MEUS ANÚNCIOS -->
+  <div id="myAdsView" class="view">
+    <h3>Meus Anúncios</h3>
+    <div id="myAdsContainer"><p style="color:#888;">Você ainda não publicou anúncios.</p></div>
+  </div>
+
+  <!-- VIEW: SEGUINDO -->
+  <div id="followingView" class="view">
+    <h3>Pessoas que sigo</h3>
+    <div id="followingContainer">
+      <p style="color:#888;">Carregando...</p>
+    </div>
+  </div>
+
+  <!-- VIEW: ANÚNCIOS DO UTILIZADOR -->
+  <div id="userAdsView" class="view">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <button onclick="switchView('followingView')" style="width:auto;padding:8px 14px;font-size:14px;margin:0;background:#f0f0f0;color:#444;border-radius:20px;">← Voltar</button>
+      <h3 id="userAdsTitle" style="margin:0;">Anúncios</h3>
+    </div>
+    <div id="userAdsContainer"><p style="color:#888;">Carregando...</p></div>
+  </div>
+
+  <!-- VIEW: NOTIFICAÇÕES -->
+  <div id="notificacoesView" class="view">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;">🔔 Notificações</h3>
+      <button onclick="marcarTodasLidas()" style="width:auto;padding:6px 14px;font-size:13px;margin:0;background:#f0f0f0;color:#444;border-radius:20px;">✅ Marcar todas lidas</button>
+    </div>
+    <div id="notificacoesContainer"><p style="color:#888;">Carregando...</p></div>
+  </div>
+
+  <!-- BOTÃO FLUTUANTE PARA + ANÚNCIO -->
+  <div class="fab-btn" onclick="openAdForm()">➕ <span style="font-weight:400;">Novo Anúncio</span></div>
+</div>
+
+<!-- ============ FORMULÁRIO DE ANÚNCIO (MODAL) ============ -->
+<style>
+  .modal-overlay {
+    display: none;
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.55);
+    z-index: 1200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-sheet {
+    background: white;
+    width: 100%;
+    max-width: 520px;
+    border-radius: 28px 28px 0 0;
+    padding: 0 0 32px;
+    max-height: 95vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s cubic-bezier(0.22,1,0.36,1);
+  }
+  @media (min-width: 600px) {
+    .modal-overlay { align-items: center; padding: 20px; }
+    .modal-sheet { border-radius: 28px; max-height: 90vh; }
+  }
+  @keyframes slideUp {
+    from { transform: translateY(60px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .modal-header {
+    position: sticky; top: 0;
+    background: white;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 18px 22px 14px;
+    border-radius: 28px 28px 0 0;
+    z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h3 { margin: 0; font-size: 18px; color: #1a1a1a; }
+  .modal-close-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #f2f2f2; border: none; cursor: pointer;
+    font-size: 18px; display: flex; align-items: center; justify-content: center;
+    color: #555; padding: 0; margin: 0; flex-shrink: 0;
+  }
+  .modal-body { padding: 18px 22px 0; }
+  .form-section {
+    background: #fafafa;
+    border: 1px solid #ebebeb;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .form-section-title {
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: #999; margin: 0 0 10px;
+  }
+  .form-section input,
+  .form-section select,
+  .form-section textarea {
+    margin-top: 8px;
+    background: white;
+    border: 1px solid #e0e0e0;
+  }
+  .form-section input:first-of-type,
+  .form-section select:first-of-type,
+  .form-section textarea:first-of-type { margin-top: 0; }
+  .price-input-wrap {
+    position: relative; margin-top: 8px;
+  }
+  .price-input-wrap input {
+    padding-right: 50px;
+    margin-top: 0;
+  }
+  .price-suffix {
+    position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%);
+    font-weight: 700; color: #cc0000; font-size: 14px;
+    pointer-events: none;
+  }
+  .photo-grid {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+  }
+  .photo-thumb {
+    position: relative; width: 90px; height: 90px;
+  }
+  .photo-thumb img {
+    width: 90px; height: 90px; object-fit: cover;
+    border-radius: 10px; border: 1px solid #ddd;
+    display: block;
+  }
+  .photo-thumb .remove-photo {
+    position: absolute; top: -6px; right: -6px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #cc0000; color: white; border: 2px solid white;
+    font-size: 12px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    padding: 0; margin: 0; line-height: 1;
+  }
+  .photo-add-btn {
+    width: 72px; height: 72px; border-radius: 10px;
+    border: 2px dashed #ccc; background: #fafafa;
+    color: #aaa; font-size: 26px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 2px; padding: 0; margin: 0;
+  }
+  .photo-add-btn span { font-size: 10px; font-weight: 600; color: #bbb; }
+  .photo-add-btn:hover { border-color: #cc0000; color: #cc0000; }
+  .photo-add-btn:hover span { color: #cc0000; }
+  .modal-footer {
+    padding: 14px 22px 0;
+  }
+  #publishBtn {
+    background: linear-gradient(135deg, #cc0000, #ff2020);
+    box-shadow: 0 4px 14px rgba(204,0,0,0.3);
+    font-size: 16px; letter-spacing: 0.2px;
+  }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .two-col input, .two-col select { margin-top: 0; }
+  .char-count { font-size: 11px; color: #bbb; text-align: right; margin-top: 3px; }
+</style>
+
+<div id="adFormModal" class="modal-overlay">
+  <div class="modal-sheet">
+    <!-- Header -->
+    <div class="modal-header">
+      <h3 id="modalTitle">➕ Novo Anúncio</h3>
+      <button class="modal-close-btn" onclick="closeAdForm()">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- SECÇÃO: PRODUTO -->
+      <div class="form-section">
+        <p class="form-section-title">📦 Produto / Serviço</p>
+        <select id="adCategory" style="margin-top:0;">
+          <option value="">Categoria</option>
+          <option>📱 Telemóveis & Tablets</option>
+          <option>💻 Informática & Electrónica</option>
+          <option>🚗 Automóveis & Motos</option>
+          <option>🏠 Imóveis & Arrendamento</option>
+          <option>👗 Moda & Vestuário</option>
+          <option>🛋️ Casa & Decoração</option>
+          <option>⚡ Electrodomésticos</option>
+          <option>🔧 Ferramentas & Construção</option>
+          <option>🌾 Agricultura & Pecuária</option>
+          <option>🍔 Alimentação & Bebidas</option>
+          <option>💼 Empregos & Serviços</option>
+          <option>🎓 Educação & Formação</option>
+          <option>💄 Beleza & Saúde</option>
+          <option>⚽ Desporto & Lazer</option>
+          <option>🐾 Animais</option>
+          <option>🎮 Jogos & Entretenimento</option>
+          <option>🔋 Energia Solar</option>
+          <option>📦 Outros</option>
+        </select>
+        <input id="adTitle" placeholder="Título do anúncio (ex: iPhone 14 Pro Max)">
+        <textarea id="adDesc" rows="3" placeholder="Descreva o produto com detalhes: estado, marca, modelo, características..." oninput="updateCharCount(this, 'descCount', 500)"></textarea>
+        <div class="char-count"><span id="descCount">0</span>/500</div>
+      </div>
+
+      <!-- SECÇÃO: LOCALIZAÇÃO -->
+      <div class="form-section">
+        <p class="form-section-title">📍 Localização</p>
+        <select id="adProvince" style="margin-top:0;">
+          <option value="">Selecione a Província</option>
+          <option>Bengo</option>
+          <option>Benguela</option>
+          <option>Bié</option>
+          <option>Cabinda</option>
+          <option>Cuando Cubango</option>
+          <option>Cunene</option>
+          <option>Huambo</option>
+          <option>Huíla</option>
+          <option>Kwanza Norte</option>
+          <option>Kwanza Sul</option>
+          <option>Luanda</option>
+          <option>Lunda Norte</option>
+          <option>Lunda Sul</option>
+          <option>Malange</option>
+          <option>Moxico</option>
+          <option>Namibe</option>
+          <option>Uíge</option>
+          <option>Zaire</option>
+        </select>
+        <input id="adNeighborhood" placeholder="Município / Bairro (ex: Viana, Talatona, Cazenga...)">
+      </div>
+
+      <!-- SECÇÃO: PREÇO & CONTACTO -->
+      <div class="form-section">
+        <p class="form-section-title">💰 Preço & Contacto</p>
+        <div class="price-input-wrap">
+          <input id="adPrice" type="number" placeholder="Preço (deixe vazio = A combinar)" min="0">
+          <span class="price-suffix">Kz</span>
+        </div>
+        <input id="adPhone" type="tel" placeholder="Telefone: +244 9XX XXX XXX">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:11px 13px;background:white;border:1px solid #e0e0e0;border-radius:10px;">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#1a1a1a;">Mostrar número publicamente</div>
+            <div style="font-size:12px;color:#999;margin-top:2px;">Permite chamadas e WhatsApp directo</div>
+          </div>
+          <label style="position:relative;display:inline-block;width:46px;height:26px;margin:0;flex-shrink:0;">
+            <input type="checkbox" id="adPhoneVisible" checked style="opacity:0;width:0;height:0;position:absolute;">
+            <span id="phoneToggleTrack" onclick="togglePhoneVisible()" style="position:absolute;inset:0;background:#cc0000;border-radius:26px;transition:0.25s;cursor:pointer;">
+              <span id="phoneToggleThumb" style="position:absolute;left:22px;top:4px;width:18px;height:18px;background:white;border-radius:50%;transition:0.25s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></span>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- SECÇÃO: FOTOS -->
+      <div class="form-section">
+        <p class="form-section-title">📸 Fotos <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#bbb;">(máx. 5 fotos)</span></p>
+        <input id="adPhotos" type="file" accept="image/*" multiple style="display:none;">
+        <div id="photoGrid" class="photo-grid"></div>
+        <button type="button" onclick="document.getElementById('adPhotos').click()"
+          style="width:100%;margin-top:10px;padding:13px;background:#fafafa;border:2px dashed #ccc;border-radius:12px;color:#888;font-size:15px;font-weight:600;cursor:pointer;">
+          📷 Toque aqui para adicionar fotos
+        </button>
+        <div id="photoPreview" class="photo-preview" style="display:none;"></div>
+      </div>
+
+    </div><!-- end modal-body -->
+
+    <!-- Footer com botões -->
+    <div class="modal-footer">
+      <button class="btn-success" id="publishBtn" onclick="publishAd()">🚀 Publicar Anúncio</button>
+      <button class="btn-secondary" onclick="closeAdForm()" style="margin-top:8px; background:#f0f0f0; color:#444;">Cancelar</button>
+    </div>
+  </div>
+</div>
+<!-- ============ FIREBASE MODULES ============ -->
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js"
+  }
+}
+</script>
+
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  onAuthStateChanged, 
+  signOut, 
+  updateProfile
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  doc, setDoc, getDoc, collection, addDoc, 
+  query, where, getDocs, onSnapshot, updateDoc, deleteDoc, orderBy,
+  arrayUnion, arrayRemove
+} from "firebase/firestore";
+
+// --- CONFIG ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDj9GfibZ77BepNSaoZviqDF-qeNRcz064",
+  authDomain: "angomarket-1543f.firebaseapp.com",
+  projectId: "angomarket-1543f",
+  storageBucket: "angomarket-1543f.firebasestorage.app",
+  messagingSenderId: "14599437423",
+  appId: "1:14599437423:web:ec4401fd1e852928b2a19a"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// --- VARIÁVEIS GLOBAIS ---
+let currentUser = null;
+let currentUserData = null;
+let allAds = [];
+let currentAdId = null;
+
+  // --- FUNÇÕES UI (expostas no window) ---
+window.switchAuthTab = (tab) => {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  if(tab === 'login') {
+    document.querySelectorAll('.auth-tab')[0].classList.add('active');
+    document.getElementById('form-login').classList.add('active');
+  } else {
+    document.querySelectorAll('.auth-tab')[1].classList.add('active');
+    document.getElementById('form-register').classList.add('active');
+  }
+};
+
+window.toggleMenu = () => {
+  const m = document.getElementById("menu");
+  const overlay = document.getElementById("menuOverlay");
+  if (m.style.left === "0px") { m.style.left = "-280px"; overlay.style.display = "none"; } 
+  else { m.style.left = "0px"; overlay.style.display = "block"; }
+};
+
+window.switchView = (viewId) => {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+  const el = document.getElementById(viewId);
+  if (el) el.classList.add('active-view');
+  document.getElementById("menu").style.left = "-280px";
+  document.getElementById("menuOverlay").style.display = "none";
+  
+  if (viewId === 'profileView') { loadProfile(); loadMyFollowers(); }
+  if (viewId === 'myAdsView') loadMyAds();
+  if (viewId === 'followingView') loadFollowing();
+  if (viewId === 'notificacoesView') loadNotificacoes();
+};
+
+window.toggleEditProfile = () => {
+  const form = document.getElementById('editProfileForm');
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    document.getElementById('editName').value = document.getElementById('pName').textContent;
+    document.getElementById('editPhone').value = document.getElementById('pPhone').textContent;
+  } else {
+    form.style.display = 'none';
+  }
+};
+
+// --- LOGIN (email) ---
+window.loginEmail = async () => {
+  const email = document.getElementById("loginEmail").value;
+  const pass = document.getElementById("loginPassword").value;
+  if (!email || !pass) { alert("Preencha e-mail e senha."); return; }
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    enterApp(cred.user);
+  } catch(e) { alert("Erro: " + e.message); }
+};
+
+// --- ENTRAR NO APP ---
+function enterApp(user) {
+  currentUser = user;
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  loadProfile();
+  loadAds();
+  switchView('homeView');
+  // Carregar badge de notificações
+  setTimeout(() => loadNotifCount(), 1500);
+}
+
+async function loadNotifCount() {
+  if (!currentUser) return;
+  try {
+    const q = query(collection(db, "notificacoes"), where("destinatario","==",currentUser.uid), where("lida","==",false));
+    const snap = await getDocs(q);
+    updateNotifBadge(snap.size);
+  } catch(e) {}
+}
+
+// --- LOGOUT ---
+window.logout = async () => {
+  await signOut(auth);
+  location.reload();
+};
+  // --- CARREGAR PERFIL ---
+async function loadProfile() {
+  if (!currentUser) return;
+  try {
+    const ref = doc(db, "utilizadores", currentUser.uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      currentUserData = data;
+      document.getElementById("pName").innerText = data.nome || '---';
+      document.getElementById("pPhone").innerText = data.telefone || '---';
+      document.getElementById("pDate").innerText = data.dataInscricao ? new Date(data.dataInscricao).toLocaleDateString('pt-PT') : '---';
+      if (data.avatar) {
+        document.getElementById("profileAvatar").src = data.avatar;
+      }
+    } else {
+      await setDoc(ref, {
+        nome: currentUser.displayName || 'Usuário',
+        telefone: currentUser.phoneNumber || '',
+        dataInscricao: new Date().toISOString(),
+        uid: currentUser.uid,
+        avatar: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.displayName || 'User') + '&background=cc0000&color=fff&size=80'
+      });
+      loadProfile();
+    }
+  } catch (e) {
+    console.error("Erro ao carregar perfil:", e);
+  }
+}
+
+// --- SALVAR PERFIL ---
+window.saveProfile = async () => {
+  if (!currentUser) return;
+  
+  const saveBtn = document.querySelector('#editProfileForm .btn-success');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Salvando...';
+  
+  const newName = document.getElementById('editName').value.trim();
+  const newPhone = document.getElementById('editPhone').value.trim();
+  const newAvatar = document.getElementById('editAvatar').value.trim();
+  
+  if (!newName) { 
+    alert("Nome é obrigatório."); 
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Salvar alterações';
+    return; 
+  }
+  
+  const cleanPhone = newPhone.replace(/\s/g, '');
+  if (cleanPhone && !cleanPhone.startsWith("+244") && cleanPhone.length < 13) { 
+    alert("Telefone deve começar com +244 e ter 9 dígitos."); 
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Salvar alterações';
+    return; 
+  }
+  
+  try {
+    const ref = doc(db, "utilizadores", currentUser.uid);
+    const updateData = { 
+      nome: newName,
+      telefone: cleanPhone || currentUserData?.telefone || ''
+    };
+    if (newAvatar) updateData.avatar = newAvatar;
+    
+    await setDoc(ref, updateData, { merge: true });
+    
+    if (currentUser) {
+      await updateProfile(currentUser, { displayName: newName });
+    }
+    
+    showToast("✅ Perfil atualizado! A regressar ao início...");
+    toggleEditProfile();
+    await loadProfile();
+    await loadAds();
+    setTimeout(() => switchView('homeView'), 2000);
+    
+  } catch (e) {
+    alert("Erro ao salvar: " + e.message);
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Salvar alterações';
+  }
+};
+
+
+// --- REGISTO EMAIL ---
+window.registerEmail = async () => {
+  const name = document.getElementById("regName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPassword").value;
+  const confirmPassword = document.getElementById("regConfirmPassword").value;
+
+  if (!name || !email || !password || !confirmPassword) {
+    alert("Preencha todos os campos.");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("As senhas não coincidem.");
+    return;
+  }
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+    await updateProfile(cred.user, { displayName: name });
+
+    await setDoc(doc(db, "utilizadores", cred.user.uid), {
+      nome: name,
+      email: email,
+      uid: cred.user.uid,
+      dataInscricao: new Date().toISOString()
+    }, { merge:true });
+
+    await sendEmailVerification(cred.user);
+
+    document.getElementById("verification-section").style.display = "block";
+    document.getElementById("verifyEmailDisplay").innerText = email;
+
+    alert("Conta criada. Verifique o email.");
+  } catch(e) {
+    alert("Erro ao criar conta: " + e.message);
+  }
+};
+
+window.sendPasswordReset = async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  if (!email) {
+    alert("Digite o email.");
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    alert("Link de recuperação enviado.");
+  } catch(e) {
+    alert("Erro: " + e.message);
+  }
+};
+
+window.resendVerificationEmail = async () => {
+  if (!auth.currentUser) {
+    alert("Faça login novamente.");
+    return;
+  }
+
+  try {
+    await sendEmailVerification(auth.currentUser);
+    alert("Email reenviado.");
+  } catch(e) {
+    alert("Erro: " + e.message);
+  }
+};
+
+window.checkEmailVerified = async () => {
+  if (!auth.currentUser) {
+    alert("Faça login.");
+    return;
+  }
+
+  await auth.currentUser.reload();
+
+  if (auth.currentUser.emailVerified) {
+    alert("Email verificado com sucesso!");
+    enterApp(auth.currentUser);
+  } else {
+    alert("O email ainda não foi verificado.");
+  }
+};
+
+
+// --- OBSERVER DE AUTENTICAÇÃO ---
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    document.getElementById("auth").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    loadProfile();
+    loadAds();
+    switchView('homeView');
+    setTimeout(() => loadNotifCount(), 1500);
+  } else {
+    document.getElementById("auth").style.display = "block";
+    document.getElementById("app").style.display = "none";
+  }
+});
+
+
+  // --- PUBLICAR ANÚNCIO (Abrir Formulário) ---
+// Armazena fotos seleccionadas (base64)
+let selectedPhotos = [];
+
+window.updateCharCount = (el, countId, max) => {
+  const len = el.value.length;
+  document.getElementById(countId).textContent = len;
+  if (len > max) el.value = el.value.substring(0, max);
+};
+
+function renderPhotoGrid() {
+  const grid = document.getElementById('photoGrid');
+  grid.innerHTML = '';
+  selectedPhotos.forEach((src, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'photo-thumb';
+    thumb.innerHTML = `
+      <img src="${src}" style="width:90px;height:90px;object-fit:cover;border-radius:10px;border:1px solid #ddd;">
+      <button class="remove-photo" onclick="removePhoto(${i})">✕</button>
+    `;
+    grid.appendChild(thumb);
+  });
+}
+
+window.removePhoto = (index) => {
+  selectedPhotos.splice(index, 1);
+  renderPhotoGrid();
+};
+
+window.openAdForm = (adId = null) => {
+  if (!currentUser) { alert("Faça login primeiro."); return; }
+  currentAdId = adId;
+  selectedPhotos = [];
+  document.getElementById("adFormModal").style.display = "flex";
+  document.getElementById("adPhotos").value = '';
+  document.getElementById("adTitle").value = '';
+  document.getElementById("adDesc").value = '';
+  document.getElementById("adProvince").value = '';
+  document.getElementById("adPhone").value = '';
+  document.getElementById("adPrice").value = '';
+  document.getElementById("adCategory").value = '';
+  document.getElementById("adNeighborhood").value = '';
+  document.getElementById("descCount").textContent = '0';
+  renderPhotoGrid();
+  
+  if (adId) {
+    const ad = allAds.find(a => a.id === adId);
+    if (ad) {
+      document.getElementById("adTitle").value = ad.titulo || '';
+      document.getElementById("adDesc").value = ad.descricao || '';
+      document.getElementById("adProvince").value = ad.provincia || '';
+      document.getElementById("adPhone").value = ad.telefone || '';
+      // Preço: remover " Kz" ou "A combinar"
+      const precoRaw = (ad.preco || '').replace(/[^0-9]/g, '');
+      document.getElementById("adPrice").value = precoRaw;
+      document.getElementById("adCategory").value = ad.categoria || '';
+      document.getElementById("adNeighborhood").value = ad.bairro || '';
+      document.getElementById("descCount").textContent = (ad.descricao || '').length;
+      if (ad.fotos && ad.fotos.length > 0) {
+        selectedPhotos = [...ad.fotos];
+        renderPhotoGrid();
+      }
+      // Restaurar toggle de visibilidade
+      const cb = document.getElementById('adPhoneVisible');
+      const track = document.getElementById('phoneToggleTrack');
+      const thumb = document.getElementById('phoneToggleThumb');
+      const vis = ad.telefoneVisivel !== false;
+      cb.checked = vis;
+      track.style.background = vis ? '#cc0000' : '#ccc';
+      thumb.style.left = vis ? '22px' : '4px';
+
+      document.getElementById('modalTitle').textContent = '✏️ Editar Anúncio';
+      document.getElementById('publishBtn').textContent = '💾 Atualizar Anúncio';
+    }
+  } else {
+    document.getElementById('modalTitle').textContent = '➕ Novo Anúncio';
+    document.getElementById('publishBtn').textContent = '🚀 Publicar Anúncio';
+  }
+};
+
+window.closeAdForm = () => {
+  document.getElementById("adFormModal").style.display = "none";
+  currentAdId = null;
+};
+
+// --- PREVIEW DE FOTOS (corrigido) ---
+document.addEventListener('change', (e) => {
+  if (e.target && e.target.id === 'adPhotos') {
+    const files = Array.from(e.target.files);
+    const slots = 5 - selectedPhotos.length;
+    if (files.length > slots) {
+      showToast(`Máximo 5 fotos. Pode adicionar apenas mais ${slots}.`, true);
+      e.target.value = '';
+      return;
+    }
+    let erros = [];
+    let processados = 0;
+    files.forEach(f => {
+      // Verificar tamanho: máx 2 MB
+      if (f.size > 2 * 1024 * 1024) {
+        erros.push(`"${f.name}" ultrapassa 2 MB`);
+        processados++;
+        if (processados === files.length && erros.length) showToast('Fotos rejeitadas (>2MB): ' + erros.join(', '), true);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        selectedPhotos.push(ev.target.result);
+        renderPhotoGrid();
+        processados++;
+        if (processados === files.length && erros.length) showToast('Fotos rejeitadas (>2MB): ' + erros.join(', '), true);
+      };
+      reader.onerror = () => {
+        processados++;
+        erros.push(f.name);
+      };
+      reader.readAsDataURL(f);
+    });
+    e.target.value = '';
+  }
+});
+// --- TOGGLE VISIBILIDADE TELEFONE ---
+window.togglePhoneVisible = () => {
+  const cb = document.getElementById('adPhoneVisible');
+  cb.checked = !cb.checked;
+  const track = document.getElementById('phoneToggleTrack');
+  const thumb = document.getElementById('phoneToggleThumb');
+  if (cb.checked) {
+    track.style.background = '#cc0000';
+    thumb.style.left = '22px';
+  } else {
+    track.style.background = '#ccc';
+    thumb.style.left = '4px';
+  }
+};
+
+// --- PUBLICAR ANÚNCIO (Salvar) ---
+window.publishAd = async () => {
+  if (!currentUser) { showToast("Utilizador não autenticado.", true); return; }
+  
+  const publishBtn = document.getElementById('publishBtn');
+  publishBtn.disabled = true;
+  publishBtn.textContent = 'A publicar...';
+  
+  const title = document.getElementById("adTitle").value.trim();
+  const desc = document.getElementById("adDesc").value.trim();
+  const province = document.getElementById("adProvince").value;
+  const neighborhood = document.getElementById("adNeighborhood").value.trim();
+  const phone = document.getElementById("adPhone").value.trim();
+  const price = document.getElementById("adPrice").value.trim();
+  const category = document.getElementById("adCategory").value;
+  const phoneVisible = document.getElementById("adPhoneVisible").checked;
+
+  if (!title || !desc || !province || !phone) {
+    showToast("Preencha título, descrição, província e telefone.", true);
+    publishBtn.disabled = false;
+    publishBtn.textContent = currentAdId ? '💾 Atualizar Anúncio' : '🚀 Publicar Anúncio';
+    return;
+  }
+  
+  const cleanPhone = phone.replace(/\s/g, '');
+  if (!cleanPhone.startsWith("+244") && !cleanPhone.startsWith("0")) {
+    showToast("Telefone deve começar com +244 ou 0", true);
+    publishBtn.disabled = false;
+    publishBtn.textContent = currentAdId ? '💾 Atualizar Anúncio' : '🚀 Publicar Anúncio';
+    return;
+  }
+
+  // --- ANTI-SPAM: máx 5 anúncios por dia ---
+  if (!currentAdId) {
+    try {
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      const qSpam = query(
+        collection(db, "anuncios"),
+        where("uid", "==", currentUser.uid),
+        where("data", ">=", hoje.toISOString())
+      );
+      const snapSpam = await getDocs(qSpam);
+      if (snapSpam.size >= 5) {
+        showToast("Limite de 5 anúncios por dia atingido. Tente amanhã.", true);
+        publishBtn.disabled = false;
+        publishBtn.textContent = '🚀 Publicar Anúncio';
+        return;
+      }
+    } catch(spamErr) {
+      console.warn("Anti-spam check falhou:", spamErr);
+    }
+  }
+
+  // Formatar preço
+  let precoFormatado = 'A combinar';
+  if (price) {
+    const n = parseFloat(price);
+    precoFormatado = n.toLocaleString('pt-PT') + ' Kz';
+  }
+
+  try {
+    const adData = {
+      titulo: title,
+      descricao: desc,
+      provincia: province,
+      bairro: neighborhood,
+      categoria: category,
+      telefone: cleanPhone,
+      telefoneVisivel: phoneVisible,
+      preco: precoFormatado,
+      fotos: selectedPhotos,
+      uid: currentUser.uid,
+      nomeUsuario: currentUserData?.nome || 'Anónimo',
+      data: new Date().toISOString(),
+      curtidas: currentAdId ? undefined : []
+    };
+
+    // Remover chave curtidas se for edição
+    if (currentAdId) delete adData.curtidas;
+
+    if (currentAdId) {
+      await updateDoc(doc(db, "anuncios", currentAdId), adData);
+      showToast("✅ Anúncio atualizado! A regressar...");
+    } else {
+      adData.curtidas = [];
+      await addDoc(collection(db, "anuncios"), adData);
+      await notifyFollowers('novo_anuncio', currentUser.uid, { titulo: title, uid: currentUser.uid });
+      showToast("✅ Anúncio publicado com sucesso!");
+    }
+    
+    closeAdForm();
+    await loadAds();
+    await loadMyAds();
+    setTimeout(() => switchView('homeView'), 1500);
+    
+  } catch (e) {
+    showToast("Erro ao publicar: " + e.message, true);
+  } finally {
+    publishBtn.disabled = false;
+    publishBtn.textContent = currentAdId ? '💾 Atualizar Anúncio' : '🚀 Publicar Anúncio';
+  }
+};
+
+// --- DELETAR ANÚNCIO ---
+window.deleteAd = async (adId) => {
+  if (!confirm(i18n('confirm_delete'))) return;
+  try {
+    await deleteDoc(doc(db, "anuncios", adId));
+    showToast(i18n('deleted_ok'));
+    await loadAds();
+    await loadMyAds();
+  } catch (e) {
+    showToast("Erro ao excluir: " + e.message, true);
+  }
+};
+
+// --- SISTEMA DE TRADUÇÃO ---
+let currentLang = localStorage.getItem('amLang') || 'pt';
+
+const translations = {
+  pt: {
+    search_placeholder: "Pesquisar anúncios...",
+    menu_home: "Início", menu_profile: "Perfil", menu_myads: "Meus Anúncios",
+    menu_following: "Seguindo", menu_notifs: "Notificações", menu_logout: "Sair",
+    home_title: "Anúncios recentes", home_sub: "Conecte-se com vendedores de todo o país",
+    profile_title: "Meu Perfil", myads_title: "Meus Anúncios",
+    following_title: "Pessoas que sigo", notif_title: "Notificações",
+    btn_follow: "Seguir", btn_following: "Seguindo", btn_unfollow: "Deixar de seguir",
+    btn_edit: "Editar", btn_delete: "Excluir", btn_publish: "Publicar Anúncio",
+    btn_update: "Atualizar Anúncio", btn_cancel: "Cancelar",
+    confirm_delete: "Tem certeza que deseja excluir este anúncio?",
+    deleted_ok: "Anúncio excluído!", login_btn: "Entrar", register_btn: "Registar",
+    email_ph: "E-mail", pass_ph: "Senha", name_ph: "Nome completo",
+    forgot_pass: "Esqueceu a senha?", create_account: "Criar conta",
+    spam_limit: "Limite de 5 anúncios por dia atingido. Tente amanhã.",
+    ads_empty: "Nenhum anúncio disponível. Seja o primeiro a publicar!",
+    myads_empty: "Você ainda não publicou anúncios.",
+    mark_read: "Marcar todas lidas", no_notifs: "Sem notificações.",
+    private_contact: "Contacto privado", copy_label: "(copiar)",
+    followers_label: "Seguidores", following_label: "A seguir",
+    see_ads: "Ver anúncios →", new_ad_btn: "Novo Anúncio",
+  },
+  fr: {
+    search_placeholder: "Rechercher des annonces...",
+    menu_home: "Accueil", menu_profile: "Profil", menu_myads: "Mes Annonces",
+    menu_following: "Abonnements", menu_notifs: "Notifications", menu_logout: "Déconnexion",
+    home_title: "Annonces récentes", home_sub: "Connectez-vous avec des vendeurs dans tout le pays",
+    profile_title: "Mon Profil", myads_title: "Mes Annonces",
+    following_title: "Personnes que je suis", notif_title: "Notifications",
+    btn_follow: "Suivre", btn_following: "Abonné", btn_unfollow: "Se désabonner",
+    btn_edit: "Modifier", btn_delete: "Supprimer", btn_publish: "Publier l'annonce",
+    btn_update: "Mettre à jour", btn_cancel: "Annuler",
+    confirm_delete: "Êtes-vous sûr de vouloir supprimer cette annonce ?",
+    deleted_ok: "Annonce supprimée !", login_btn: "Connexion", register_btn: "S'inscrire",
+    email_ph: "E-mail", pass_ph: "Mot de passe", name_ph: "Nom complet",
+    forgot_pass: "Mot de passe oublié ?", create_account: "Créer un compte",
+    spam_limit: "Limite de 5 annonces/jour atteinte. Réessayez demain.",
+    ads_empty: "Aucune annonce disponible. Soyez le premier à publier !",
+    myads_empty: "Vous n'avez pas encore publié d'annonces.",
+    mark_read: "Tout marquer comme lu", no_notifs: "Aucune notification.",
+    private_contact: "Contact privé", copy_label: "(copier)",
+    followers_label: "Abonnés", following_label: "Abonnements",
+    see_ads: "Voir annonces →", new_ad_btn: "Nouvelle Annonce",
+  }
+};
+
+function i18n(key) {
+  return (translations[currentLang] || translations['pt'])[key] || key;
+}
+
+window.setLang = (lang) => {
+  currentLang = lang;
+  localStorage.setItem('amLang', lang);
+  applyTranslations();
+};
+
+function applyTranslations() {
+  const t = translations[currentLang] || translations['pt'];
+  // Barre de recherche
+  const si = document.getElementById('searchInput');
+  if (si) si.placeholder = t.search_placeholder;
+  // Menu
+  const menuLinks = document.querySelectorAll('.sideMenu a');
+  const menuKeys = ['menu_home','menu_profile','menu_myads','menu_following','menu_notifs','menu_logout'];
+  menuLinks.forEach((a, i) => {
+    if (menuKeys[i]) {
+      const badge = a.querySelector('#notifBadge');
+      a.childNodes[0].textContent = t[menuKeys[i]] + ' ';
+      if (badge) a.appendChild(badge);
+    }
+  });
+  // Titres de vues
+  const homeTitle = document.querySelector('#homeView h3');
+  const homeSub = document.querySelector('#homeView p');
+  const profileTitle = document.querySelector('#profileView h3');
+  const myadsTitle = document.querySelector('#myAdsView h3');
+  const followingTitle = document.querySelector('#followingView h3');
+  if (homeTitle) homeTitle.textContent = t.home_title;
+  if (homeSub) homeSub.textContent = t.home_sub;
+  if (profileTitle) profileTitle.textContent = t.profile_title;
+  if (myadsTitle) myadsTitle.textContent = t.myads_title;
+  if (followingTitle) followingTitle.textContent = t.following_title;
+  // Bouton FAB
+  const fab = document.querySelector('.fab-btn span');
+  if (fab) fab.textContent = t.new_ad_btn;
+  // Auth
+  const loginBtn = document.querySelector('#form-login button');
+  if (loginBtn) loginBtn.textContent = t.login_btn;
+  const tabs = document.querySelectorAll('.auth-tab');
+  if (tabs[0]) tabs[0].textContent = t.login_btn;
+  if (tabs[1]) tabs[1].textContent = t.register_btn;
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPass = document.getElementById('loginPassword');
+  if (loginEmail) loginEmail.placeholder = t.email_ph;
+  if (loginPass) loginPass.placeholder = t.pass_ph;
+}
+
+// Appliquer au chargement
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('amLang') || 'pt';
+  const sel = document.getElementById('langSelect');
+  if (sel) sel.value = saved;
+  currentLang = saved;
+  applyTranslations();
+});
+  // --- FUNÇÕES DE SEGUIDORES ---
+
+// Seguir um usuário
+window.followUser = async (targetUid) => {
+  if (!currentUser) { alert("Faça login primeiro."); return; }
+  if (targetUid === currentUser.uid) { alert("Não pode seguir a si mesmo."); return; }
+  
+  try {
+    const followRef = doc(db, "seguidores", currentUser.uid);
+    await setDoc(followRef, {
+      seguindo: arrayUnion(targetUid)
+    }, { merge: true });
+    
+    const targetFollowRef = doc(db, "seguidores", targetUid);
+    await setDoc(targetFollowRef, {
+      seguidores: arrayUnion(currentUser.uid)
+    }, { merge: true });
+    
+    // Notificar o utilizador seguido
+    await criarNotificacao(targetUid, 'novo_seguidor', {
+      nome: currentUserData?.nome || 'Alguém',
+      remetenteUid: currentUser.uid
+    });
+    
+    showToast("✅ A seguir este utilizador!");
+    loadAds();
+  } catch (e) {
+    showToast("❌ Erro ao seguir. Tente novamente.", true);
+  }
+};
+
+// Deixar de seguir um usuário
+window.unfollowUser = async (targetUid) => {
+  if (!currentUser) return;
+  
+  try {
+    const followRef = doc(db, "seguidores", currentUser.uid);
+    await updateDoc(followRef, {
+      seguindo: arrayRemove(targetUid)
+    });
+    
+    const targetFollowRef = doc(db, "seguidores", targetUid);
+    await updateDoc(targetFollowRef, {
+      seguidores: arrayRemove(currentUser.uid)
+    });
+    
+    showToast("👋 Deixou de seguir este utilizador.");
+    loadAds();
+    loadFollowing();
+  } catch (e) {
+    showToast("❌ Erro ao deixar de seguir.", true);
+  }
+};
+
+// Verificar se está seguindo um usuário
+async function isFollowing(targetUid) {
+  if (!currentUser) return false;
+  try {
+    const ref = doc(db, "seguidores", currentUser.uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      return data.seguindo && data.seguindo.includes(targetUid);
+    }
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Contar seguidores de um usuário
+async function countFollowers(uid) {
+  try {
+    const ref = doc(db, "seguidores", uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      return data.seguidores ? data.seguidores.length : 0;
+    }
+    return 0;
+  } catch (e) {
+    return 0;
+  }
+}
+
+// --- FUNÇÕES DE GOSTOS (Curtidas) ---
+
+// Curtir um anúncio
+window.likeAd = async (adId) => {
+  if (!currentUser) { alert("Faça login primeiro."); return; }
+  
+  try {
+    const adRef = doc(db, "anuncios", adId);
+    const adSnap = await getDoc(adRef);
+    await updateDoc(adRef, {
+      curtidas: arrayUnion(currentUser.uid)
+    });
+    
+    const userLikesRef = doc(db, "curtidas", currentUser.uid);
+    await setDoc(userLikesRef, {
+      likes: arrayUnion(adId)
+    }, { merge: true });
+    
+    // Notificar dono do anúncio
+    if (adSnap.exists()) {
+      const adData2 = adSnap.data();
+      if (adData2.uid && adData2.uid !== currentUser.uid) {
+        await criarNotificacao(adData2.uid, 'curtida', {
+          nome: currentUserData?.nome || 'Alguém',
+          titulo: adData2.titulo || '',
+          adId: adId
+        });
+      }
+    }
+    
+    loadAds();
+  } catch (e) {
+    alert("Erro ao curtir: " + e.message);
+  }
+};
+
+// Descurtir um anúncio
+window.unlikeAd = async (adId) => {
+  if (!currentUser) return;
+  
+  try {
+    const adRef = doc(db, "anuncios", adId);
+    await updateDoc(adRef, {
+      curtidas: arrayRemove(currentUser.uid)
+    });
+    
+    const userLikesRef = doc(db, "curtidas", currentUser.uid);
+    await setDoc(userLikesRef, {
+      likes: arrayRemove(adId)
+    }, { merge: true });
+    
+    loadAds();
+  } catch (e) {
+    alert("Erro ao descurtir: " + e.message);
+  }
+};
+
+// Verificar se o usuário curtiu um anúncio
+async function userLikedAd(adId) {
+  if (!currentUser) return false;
+  try {
+    const ref = doc(db, "curtidas", currentUser.uid);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      return data.likes && data.likes.includes(adId);
+    }
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Contar curtidas de um anúncio
+function countLikes(ad) {
+  return ad.curtidas ? ad.curtidas.length : 0;
+}
+
+// --- CARREGAR PESSOAS QUE SIGO ---
+async function loadFollowing() {
+  if (!currentUser) {
+    document.getElementById("followingContainer").innerHTML = `<p style="color:#888;">Faça login para ver quem você segue.</p>`;
+    return;
+  }
+  
+  const container = document.getElementById("followingContainer");
+  container.innerHTML = '<p style="color:#888;">Carregando...</p>';
+  
+  try {
+    const ref = doc(db, "seguidores", currentUser.uid);
+    const snap = await getDoc(ref);
+    
+    if (!snap.exists() || !snap.data().seguindo || snap.data().seguindo.length === 0) {
+      container.innerHTML = `<p style="color:#888;">Você ainda não segue ninguém.</p>`;
+      return;
+    }
+    
+    const seguindo = snap.data().seguindo;
+    let html = '';
+    
+    for (let uid of seguindo) {
+      const userRef = doc(db, "utilizadores", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const user = userSnap.data();
+        const followers = await countFollowers(uid);
+        html += `
+          <div class="product-card" style="display:flex; align-items:center; gap:12px;">
+            <img src="${user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.nome || 'User') + '&background=cc0000&color=fff&size=80'}" 
+                 style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
+            <div style="flex:1;cursor:pointer;" onclick="verAnunciosUtilizador('${uid}','${(user.nome||'Anónimo').replace(/'/g,"\\'")}')">
+              <strong style="color:#0066cc;text-decoration:underline;">${user.nome || 'Anónimo'}</strong>
+              <div style="font-size:12px; color:#888;">${followers} seguidores · Ver anúncios →</div>
+            </div>
+            <button class="btn-small btn-secondary" onclick="unfollowUser('${uid}')" style="width:auto; margin:0; padding:6px 14px;">
+              Deixar de seguir
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    container.innerHTML = html || `<p style="color:#888;">Nenhum usuário encontrado.</p>`;
+    
+  } catch (e) {
+    console.error("Erro ao carregar seguindo:", e);
+    container.innerHTML = `<p style="color:#888;">Erro ao carregar. Tente novamente.</p>`;
+  }
+  }
+  // --- CRIAR CAROUSEL PARA FOTOS ---
+function createCarousel(fotos) {
+  if (!fotos || fotos.length === 0) return '';
+  
+  const container = document.createElement('div');
+  container.className = 'carousel-container';
+  
+  const slidesWrapper = document.createElement('div');
+  slidesWrapper.className = 'carousel-slides';
+  slidesWrapper.dataset.index = '0';
+  
+  fotos.forEach((foto) => {
+    const slide = document.createElement('div');
+    slide.className = 'carousel-slide';
+    const img = document.createElement('img');
+    img.src = foto;
+    img.alt = 'Foto';
+    slide.appendChild(img);
+    slidesWrapper.appendChild(slide);
+  });
+  
+  container.appendChild(slidesWrapper);
+  
+  if (fotos.length > 1) {
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'carousel-btn prev';
+    prevBtn.textContent = '❮';
+    prevBtn.onclick = (e) => {
+      e.stopPropagation();
+      const slides = container.querySelector('.carousel-slides');
+      const currentIndex = parseInt(slides.dataset.index || '0');
+      const newIndex = (currentIndex - 1 + fotos.length) % fotos.length;
+      slides.style.transform = `translateX(-${newIndex * 100}%)`;
+      slides.dataset.index = newIndex;
+      updateDots(container, newIndex);
+    };
+    container.appendChild(prevBtn);
+    
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'carousel-btn next';
+    nextBtn.textContent = '❯';
+    nextBtn.onclick = (e) => {
+      e.stopPropagation();
+      const slides = container.querySelector('.carousel-slides');
+      const currentIndex = parseInt(slides.dataset.index || '0');
+      const newIndex = (currentIndex + 1) % fotos.length;
+      slides.style.transform = `translateX(-${newIndex * 100}%)`;
+      slides.dataset.index = newIndex;
+      updateDots(container, newIndex);
+    };
+    container.appendChild(nextBtn);
+    
+    const dotsContainer = document.createElement('div');
+    dotsContainer.className = 'carousel-dots';
+    fotos.forEach((_, index) => {
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot' + (index === 0 ? ' active' : '');
+      dot.onclick = (e) => {
+        e.stopPropagation();
+        const slides = container.querySelector('.carousel-slides');
+        slides.style.transform = `translateX(-${index * 100}%)`;
+        slides.dataset.index = index;
+        updateDots(container, index);
+      };
+      dotsContainer.appendChild(dot);
+    });
+    container.appendChild(dotsContainer);
+    
+    if (fotos.length > 3) {
+      let interval = setInterval(() => {
+        const slides = container.querySelector('.carousel-slides');
+        const currentIndex = parseInt(slides.dataset.index || '0');
+        const newIndex = (currentIndex + 1) % fotos.length;
+        slides.style.transform = `translateX(-${newIndex * 100}%)`;
+        slides.dataset.index = newIndex;
+        updateDots(container, newIndex);
+      }, 4000);
+      
+      container.onmouseenter = () => clearInterval(interval);
+      container.onmouseleave = () => {
+        interval = setInterval(() => {
+          const slides = container.querySelector('.carousel-slides');
+          const currentIndex = parseInt(slides.dataset.index || '0');
+          const newIndex = (currentIndex + 1) % fotos.length;
+          slides.style.transform = `translateX(-${newIndex * 100}%)`;
+          slides.dataset.index = newIndex;
+          updateDots(container, newIndex);
+        }, 4000);
+      };
+    }
+  }
+  return container;
+}
+
+function updateDots(container, activeIndex) {
+  const dots = container.querySelectorAll('.carousel-dot');
+  dots.forEach((dot, index) => {
+    dot.className = 'carousel-dot' + (index === activeIndex ? ' active' : '');
+  });
+}
+
+// --- TOAST (mensagem sem popup) ---
+window.showToast = (msg, isError = false) => {
+  const toast = document.getElementById('toastMsg');
+  toast.textContent = msg;
+  toast.style.background = isError ? '#cc0000' : '#222';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+};
+
+// --- COPIAR TELEFONE ---
+window.copiarTelefone = async (telefone) => {
+  if (!telefone) return;
+  try {
+    await navigator.clipboard.writeText(telefone);
+    showToast("📋 Número copiado: " + telefone);
+  } catch(e) {
+    // fallback: abrir discador
+    window.location.href = 'tel:' + telefone;
+  }
+};
+
+// --- GUARDAR NOTIFICAÇÃO NO FIRESTORE ---
+async function criarNotificacao(destinatarioUid, tipo, dados) {
+  try {
+    await addDoc(collection(db, "notificacoes"), {
+      destinatario: destinatarioUid,
+      tipo: tipo, // 'novo_seguidor' | 'curtida' | 'novo_anuncio'
+      dados: dados,
+      lida: false,
+      data: new Date().toISOString()
+    });
+  } catch(e) {
+    console.error("Erro ao criar notificação:", e);
+  }
+}
+
+// --- NOTIFICAR SEGUIDORES sobre novo anúncio ---
+async function notifyFollowers(tipo, remetenteUid, dados) {
+  try {
+    const ref = doc(db, "seguidores", remetenteUid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    const seguidores = snap.data().seguidores || [];
+    for (let uid of seguidores) {
+      await criarNotificacao(uid, tipo, { ...dados, remetenteUid });
+    }
+  } catch(e) {
+    console.error("Erro notifyFollowers:", e);
+  }
+}
+
+// --- CARREGAR NOTIFICAÇÕES ---
+async function loadNotificacoes() {
+  if (!currentUser) return;
+  const container = document.getElementById("notificacoesContainer");
+  container.innerHTML = '<p style="color:#888;">Carregando...</p>';
+  
+  try {
+    const q = query(
+      collection(db, "notificacoes"),
+      where("destinatario", "==", currentUser.uid),
+      orderBy("data", "desc")
+    );
+    const snap = await getDocs(q);
+    
+    if (snap.empty) {
+      container.innerHTML = `<p style="color:#888;text-align:center;">Sem notificações.</p>`;
+      updateNotifBadge(0);
+      return;
+    }
+    
+    let html = '';
+    let naoLidas = 0;
+    snap.forEach(docSnap => {
+      const n = docSnap.data();
+      if (!n.lida) naoLidas++;
+      const icons = { novo_seguidor: '👤', curtida: '❤️', novo_anuncio: '📢' };
+      const textos = {
+        novo_seguidor: `<strong>${n.dados?.nome || 'Alguém'}</strong> começou a seguir você`,
+        curtida: `<strong>${n.dados?.nome || 'Alguém'}</strong> adorou o seu anúncio "<em>${n.dados?.titulo || ''}</em>"`,
+        novo_anuncio: `Um utilizador que segue publicou um novo anúncio: "<em>${n.dados?.titulo || ''}</em>"`
+      };
+      const tempo = n.data ? timeAgo(n.data) : '';
+      html += `
+        <div class="notif-card ${n.lida ? 'lida' : ''}">
+          <div class="notif-icon">${icons[n.tipo] || '🔔'}</div>
+          <div class="notif-text">
+            ${textos[n.tipo] || n.tipo}
+            <div class="notif-time">${tempo}</div>
+          </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+    updateNotifBadge(naoLidas);
+  } catch(e) {
+    container.innerHTML = `<p style="color:#888;">Erro ao carregar notificações.</p>`;
+  }
+}
+
+function updateNotifBadge(count) {
+  const badge = document.getElementById('notifBadge');
+  const badgeTop = document.getElementById('notifBadgeTop');
+  if (count > 0) {
+    if (badge) { badge.style.display = 'inline'; badge.textContent = count; }
+    if (badgeTop) { badgeTop.style.display = 'flex'; badgeTop.textContent = count; }
+  } else {
+    if (badge) badge.style.display = 'none';
+    if (badgeTop) badgeTop.style.display = 'none';
+  }
+}
+
+function timeAgo(isoString) {
+  const diff = Date.now() - new Date(isoString).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return 'agora mesmo';
+  if (min < 60) return `há ${min} min`;
+  const h = Math.floor(min / 60);
+  if (h < 24) return `há ${h}h`;
+  return `há ${Math.floor(h/24)} dias`;
+}
+
+window.marcarTodasLidas = async () => {
+  if (!currentUser) return;
+  try {
+    const q = query(collection(db, "notificacoes"), where("destinatario", "==", currentUser.uid), where("lida", "==", false));
+    const snap = await getDocs(q);
+    for (let d of snap.docs) {
+      await updateDoc(doc(db, "notificacoes", d.id), { lida: true });
+    }
+    loadNotificacoes();
+    showToast("✅ Todas marcadas como lidas");
+  } catch(e) { showToast("Erro ao marcar.", true); }
+};
+
+// --- CARREGAR SEGUIDORES NO PERFIL ---
+async function loadMyFollowers() {
+  if (!currentUser) return;
+  const container = document.getElementById('myFollowersList');
+  
+  try {
+    const ref = doc(db, "seguidores", currentUser.uid);
+    const snap = await getDoc(ref);
+    
+    if (!snap.exists() || !snap.data().seguidores || snap.data().seguidores.length === 0) {
+      container.innerHTML = `<p style="color:#888;font-size:14px;">Ainda ninguém te segue.</p>`;
+      document.getElementById('pFollowersCount').textContent = '0';
+      return;
+    }
+    
+    const seguidores = snap.data().seguidores;
+    document.getElementById('pFollowersCount').textContent = seguidores.length;
+    
+    // Contar seguindo
+    const seguindo = snap.data().seguindo || [];
+    document.getElementById('pFollowingCount').textContent = seguindo.length;
+
+    let html = '';
+    for (let uid of seguidores) {
+      const uSnap = await getDoc(doc(db, "utilizadores", uid));
+      if (uSnap.exists()) {
+        const u = uSnap.data();
+        html += `
+          <div class="follower-item">
+            <img src="${u.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.nome||'User') + '&background=cc0000&color=fff&size=80'}"
+                 style="width:42px;height:42px;border-radius:50%;object-fit:cover;">
+            <div style="flex:1;">
+              <strong style="font-size:14px;">${u.nome || 'Anónimo'}</strong>
+            </div>
+          </div>`;
+      }
+    }
+    container.innerHTML = html || `<p style="color:#888;font-size:14px;">Nenhum seguidor encontrado.</p>`;
+  } catch(e) {
+    container.innerHTML = `<p style="color:#888;font-size:14px;">Erro ao carregar.</p>`;
+  }
+}
+
+// --- VER ANÚNCIOS DE UM UTILIZADOR ---
+window.verAnunciosUtilizador = async (uid, nome) => {
+  document.getElementById('userAdsTitle').textContent = `📦 Anúncios de ${nome}`;
+  switchView('userAdsView');
+  const container = document.getElementById('userAdsContainer');
+  container.innerHTML = '<p style="color:#888;">Carregando...</p>';
+  
+  try {
+    const q = query(collection(db, "anuncios"), where("uid","==", uid), orderBy("data","desc"));
+    const snap = await getDocs(q);
+    if (snap.empty) {
+      container.innerHTML = `<p style="color:#888;">Este utilizador ainda não tem anúncios.</p>`;
+      return;
+    }
+    container.innerHTML = '';
+    snap.forEach(d => {
+      const ad = { id: d.id, ...d.data() };
+      const fotos = ad.fotos || [];
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      const ligarHref = ad.telefone ? `tel:${ad.telefone}` : '#';
+      const waNum = ad.telefone ? ad.telefone.replace(/[^0-9]/g,'') : '';
+      card.innerHTML = `
+        <h4 style="margin:0 0 6px;">${ad.titulo || 'Sem título'}</h4>
+        ${ad.categoria ? `<div style="font-size:12px;color:#888;margin-bottom:6px;">🏷️ ${ad.categoria}</div>` : ''}
+        <div id="uc-carousel-${ad.id}"></div>
+        <p style="font-size:14px;color:#444;margin:8px 0;">${ad.descricao || ''}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0;">
+          <span>📍 ${ad.provincia || '---'}</span>
+          <span style="font-weight:700;color:#cc0000;">💰 ${ad.preco || 'A combinar'}</span>
+        </div>
+        ${ad.telefoneVisivel !== false ? `
+          <div style="display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap;">
+            <a href="${ligarHref}" style="flex:1;min-width:110px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;background:#f0f7ff;border:1px solid #c8dff7;border-radius:10px;color:#0066cc;font-weight:600;font-size:14px;text-decoration:none;">📞 Ligar</a>
+            <a href="https://wa.me/${waNum}" target="_blank" style="flex:1;min-width:110px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;background:#f0faf3;border:1px solid #b7e0c4;border-radius:10px;color:#1a8a3f;font-weight:600;font-size:14px;text-decoration:none;">💬 WhatsApp</a>
+          </div>` : `<div style="font-size:13px;color:#bbb;margin:8px 0;">🔒 Contacto privado</div>`}
+        <div style="font-size:12px;color:#bbb;margin-top:6px;">📅 ${ad.data ? new Date(ad.data).toLocaleDateString('pt-PT') : ''}</div>
+      `;
+      if (fotos.length > 0) {
+        const ph = card.querySelector('#uc-carousel-' + ad.id);
+        if (ph) ph.replaceWith(createCarousel(fotos));
+      } else {
+        const ph = card.querySelector('#uc-carousel-' + ad.id);
+        if (ph) ph.remove();
+      }
+      container.appendChild(card);
+    });
+  } catch(e) {
+    container.innerHTML = `<p style="color:#888;">Erro ao carregar anúncios.</p>`;
+  }
+};
+
+
+function loadAds() {
+  const container = document.getElementById("adsContainer");
+  const q = query(collection(db, "anuncios"), orderBy("data", "desc"));
+  
+  return new Promise((resolve) => {
+    onSnapshot(q, (snap) => {
+      allAds = [];
+      if (snap.empty) {
+        container.innerHTML = `<p style="color:#888; text-align:center;">Nenhum anúncio disponível. Seja o primeiro a publicar!</p>`;
+        resolve();
+        return;
+      }
+      snap.forEach(doc => {
+        allAds.push({ id: doc.id, ...doc.data() });
+      });
+      renderAds(allAds);
+      resolve();
+    });
+  });
+  }
+  // --- RENDERIZAR ANÚNCIOS COM SEGUIR E CURTIR ---
+async function renderAds(ads) {
+  const container = document.getElementById("adsContainer");
+  if (ads.length === 0) {
+    container.innerHTML = `<p style="color:#888; text-align:center;">Nenhum anúncio encontrado.</p>`;
+    return;
+  }
+
+  // Resolver todos os awaits em paralelo antes de construir o HTML
+  const adDataList = await Promise.all(ads.map(async (ad) => {
+    const isOwner = currentUser && ad.uid === currentUser.uid;
+    const likesCount = countLikes(ad);
+    const isLiked = await userLikedAd(ad.id);
+    const following = await isFollowing(ad.uid);
+    const followersCount = await countFollowers(ad.uid);
+    return { ad, isOwner, likesCount, isLiked, following, followersCount };
+  }));
+
+  container.innerHTML = '';
+
+  adDataList.forEach(({ ad, isOwner, likesCount, isLiked, following, followersCount }) => {
+    const fotos = ad.fotos || [];
+    const carouselId = 'carousel-' + ad.id;
+
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.dataset.adId = ad.id;
+
+    const ligarHref = ad.telefone ? `tel:${ad.telefone}` : '#';
+    const waNum = ad.telefone ? ad.telefone.replace(/[^0-9]/g,'') : '';
+    const waHref = `https://wa.me/${waNum}`;
+
+    card.innerHTML = `
+      <div class="flex-between" style="margin-bottom:8px;">
+        <h4 style="margin:0;font-size:16px;">${ad.titulo || 'Sem título'}</h4>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <span style="font-size:12px;color:#888;">❤️ ${likesCount}</span>
+          ${!isOwner && currentUser ? `
+            <button class="btn-small ${isLiked ? 'btn-danger' : 'btn-outline'}"
+                    onclick="${isLiked ? `unlikeAd('${ad.id}')` : `likeAd('${ad.id}')`}"
+                    style="padding:4px 10px;font-size:12px;margin:0;width:auto;">
+              ${isLiked ? '❤️' : '🤍'}
+            </button>` : ''}
+        </div>
+      </div>
+
+      ${ad.categoria ? `<div style="font-size:12px;color:#888;margin-bottom:6px;">🏷️ ${ad.categoria}</div>` : ''}
+
+      <div id="${carouselId}" style="margin-bottom:10px;"></div>
+
+      <p style="font-size:14px;color:#444;margin:8px 0;">${ad.descricao || ''}</p>
+
+      <div class="meta" style="margin:8px 0;">
+        <span>📍 ${ad.provincia || '---'}${ad.bairro ? ', ' + ad.bairro : ''}</span>
+        <span style="font-weight:700;color:#cc0000;">💰 ${ad.preco || 'A combinar'}</span>
+      </div>
+
+      ${ad.telefoneVisivel !== false ? `
+        <div style="display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap;">
+          <a href="${ligarHref}" style="flex:1;min-width:110px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;background:#f0f7ff;border:1px solid #c8dff7;border-radius:10px;color:#0066cc;font-weight:600;font-size:14px;text-decoration:none;">📞 Ligar</a>
+          <a href="${waHref}" target="_blank" style="flex:1;min-width:110px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;background:#f0faf3;border:1px solid #b7e0c4;border-radius:10px;color:#1a8a3f;font-weight:600;font-size:14px;text-decoration:none;">💬 WhatsApp</a>
+        </div>
+        <div style="font-size:12px;color:#aaa;margin-bottom:4px;cursor:pointer;" onclick="copiarTelefone('${ad.telefone || ''}')" title="Toque para copiar ou ligar">📞 <span style="text-decoration:underline;color:#0066cc;">${ad.telefone || ''}</span> <span style="font-size:11px;color:#bbb;">(copiar)</span></div>
+      ` : `<div style="font-size:13px;color:#bbb;margin:8px 0;">🔒 Contacto privado</div>`}
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 4px;">
+        <span style="font-size:13px;color:#555;cursor:pointer;" onclick="verAnunciosUtilizador('${ad.uid}','${(ad.nomeUsuario||'Anónimo').replace(/'/g,"\\'")}')">
+          👤 <span style="text-decoration:underline;color:#0066cc;">${ad.nomeUsuario || 'Anónimo'}</span>
+          <span style="font-size:11px;color:#888;">(${followersCount} seg.)</span>
+        </span>
+        ${!isOwner && currentUser && ad.uid ? `
+          <button class="btn-small ${following ? 'btn-secondary' : 'btn-success'}"
+                  onclick="${following ? `unfollowUser('${ad.uid}')` : `followUser('${ad.uid}')`}"
+                  style="padding:4px 12px;font-size:12px;margin:0;width:auto;">
+            ${following ? '✅ Seguindo' : '➕ Seguir'}
+          </button>` : ''}
+      </div>
+
+      <div style="font-size:12px;color:#bbb;margin-top:6px;">
+        📅 ${ad.data ? new Date(ad.data).toLocaleDateString('pt-PT') : ''}
+      </div>
+
+      ${isOwner ? `
+        <div class="actions" style="margin-top:10px;">
+          <button class="btn-small btn-success" onclick="openAdForm('${ad.id}')">✏️ Editar</button>
+          <button class="btn-small btn-danger" onclick="deleteAd('${ad.id}')">🗑️ Excluir</button>
+        </div>` : ''}
+    `;
+
+    // Inserir carrossel se houver fotos
+    if (fotos.length > 0) {
+      const carouselEl = createCarousel(fotos);
+      const placeholder = card.querySelector('#' + carouselId);
+      if (placeholder) placeholder.replaceWith(carouselEl);
+    } else {
+      const placeholder = card.querySelector('#' + carouselId);
+      if (placeholder) placeholder.remove();
+    }
+
+    container.appendChild(card);
+  });
+}
+
+// --- FILTRAR ANÚNCIOS ---
+window.filterAds = () => {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (!searchTerm) {
+    renderAds(allAds);
+    return;
+  }
+  const filtered = allAds.filter(ad => 
+    (ad.titulo && ad.titulo.toLowerCase().includes(searchTerm)) ||
+    (ad.descricao && ad.descricao.toLowerCase().includes(searchTerm)) ||
+    (ad.provincia && ad.provincia.toLowerCase().includes(searchTerm)) ||
+    (ad.nomeUsuario && ad.nomeUsuario.toLowerCase().includes(searchTerm))
+  );
+  renderAds(filtered);
+};
+// --- CARREGAR MEUS ANÚNCIOS (corrigido) ---
+async function loadMyAds() {
+  if (!currentUser) {
+    document.getElementById("myAdsContainer").innerHTML = `<p style="color:#888;">Faça login para ver seus anúncios.</p>`;
+    return;
+  }
+  
+  const container = document.getElementById("myAdsContainer");
+  container.innerHTML = '<p style="color:#888;text-align:center;">A carregar os seus anúncios...</p>';
+  
+  try {
+    const q = query(
+      collection(db, "anuncios"), 
+      where("uid", "==", currentUser.uid),
+      orderBy("data", "desc")
+    );
+    const snap = await getDocs(q);
+    
+    if (snap.empty) {
+      container.innerHTML = `<p style="color:#888;text-align:center;">Você ainda não publicou anúncios.</p>`;
+      return;
+    }
+    
+    container.innerHTML = '';
+    snap.forEach(docSnap => {
+      const ad = { id: docSnap.id, ...docSnap.data() };
+      const fotos = ad.fotos || [];
+      const likesCount = countLikes(ad);
+
+      const card = document.createElement('div');
+      card.className = 'product-card';
+
+      card.innerHTML = `
+        <div class="flex-between" style="margin-bottom:8px;">
+          <div>
+            <h4 style="margin:0;">${ad.titulo || 'Sem título'}</h4>
+            ${ad.categoria ? `<div style="font-size:12px;color:#888;margin-top:2px;">${ad.categoria}</div>` : ''}
+          </div>
+          <span style="font-size:13px;color:#888;">♥ ${likesCount}</span>
+        </div>
+        <div class="myad-carousel-slot"></div>
+        <div class="meta" style="margin:8px 0;">
+          <span>📍 ${ad.provincia || '---'}${ad.bairro ? ', ' + ad.bairro : ''}</span>
+          <span style="font-weight:700;color:#cc0000;">💰 ${ad.preco || 'A combinar'}</span>
+        </div>
+        <p style="font-size:14px;color:#444;margin:4px 0 8px;">${ad.descricao || ''}</p>
+        <div style="font-size:12px;color:#aaa;">📅 ${ad.data ? new Date(ad.data).toLocaleDateString('pt-PT') : ''}</div>
+        <div class="actions" style="margin-top:10px;">
+          <button class="btn-small btn-success" onclick="openAdForm('${ad.id}')">Editar</button>
+          <button class="btn-small btn-danger" onclick="deleteAd('${ad.id}')">Excluir</button>
+        </div>
+      `;
+
+      if (fotos.length > 0) {
+        const slot = card.querySelector('.myad-carousel-slot');
+        if (slot) slot.replaceWith(createCarousel(fotos));
+      } else {
+        const slot = card.querySelector('.myad-carousel-slot');
+        if (slot) slot.remove();
+      }
+
+      container.appendChild(card);
+    });
+    
+  } catch (e) {
+    console.error("Erro ao carregar meus anúncios:", e);
+    container.innerHTML = `<p style="color:#cc0000;text-align:center;">Erro ao carregar. Verifique as regras do Firestore ou tente novamente.</p>`;
+  }
+}
+
+</script>
+</body>
+</html>
